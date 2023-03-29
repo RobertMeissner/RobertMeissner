@@ -10,6 +10,12 @@
 </div>
 <img src="https://komarev.com/ghpvc/?username=RMeissnerCC&style=flat-square&color=blue" alt=""/>
 
+Help me help others:
+
+<div id="badges">
+<a href="https://patreon.com/RobertForFuture"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Faceasin-patreon.herokuapp.com%2FRobertForFuture&color=FF5441&label=Patreon&logo=Patreon&logoColor=FF5441&style=for-the-badge" alt="Patreon"> </a>
+</div>
+
 ### :fire: My Stats :
 
 [![GitHub Streak](http://github-readme-streak-stats.herokuapp.com?user=RMeissnerCC&theme=dark&background=000000)](https://git.io/streak-stats)
