@@ -29,7 +29,7 @@
 
 
 ### Blogs posts
-My own [blog](http://robertforpresent.de/)
+My own [blog](https://robertforpresent.de/)
 <!-- BLOG-POST-LIST:START -->
 <!-- BLOG-POST-LIST:END -->
 
