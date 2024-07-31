@@ -18,8 +18,7 @@ My own [blog](http://robertforpresent.de/)
 <a href="https://linkedin.com/in/robertmei%c3%9fner" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="robertmei%c3%9fner" height="30" width="40" /></a>
 <a href="https://discord.gg/7XaYApEs" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/discord.svg" alt="7XaYApEs" height="30" width="40" /></a>
 <a href="/http://robertforpresent.de/feed/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/rss.svg" alt="http://robertforpresent.de/feed/" height="30" width="40" /></a>
-  <br></br>
-<a href="https://rmeissner2021.itch.io"> ItchIo </a>
+<a href="https://rmeissner2021.itch.io"> <img align="center" src="[https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/rss.svg](http://jessemillar.github.io/available-on-itchio-badge/badge-color.png)" height="30" width="40" /> </a>
 </p>
 
 <h3 align="left">Languages and Tools:</h3>
