@@ -31,6 +31,10 @@
 ### Blogs posts
 My own [blog](https://robertforpresent.de/)
 <!-- BLOG-POST-LIST:START -->
+- [Velvet – Alpha](https://robertforpresent.de/science-fiction/velvet-alpha/?utm_source=rss&utm_medium=rss&utm_campaign=velvet-alpha)
+- [Supraraum](https://robertforpresent.de/science-fiction/supraraum/?utm_source=rss&utm_medium=rss&utm_campaign=supraraum)
+- [Opa ist tot.](https://robertforpresent.de/science-fiction/opa-ist-tot/?utm_source=rss&utm_medium=rss&utm_campaign=opa-ist-tot)
+- [SPQR](https://robertforpresent.de/science-fiction/spqr/?utm_source=rss&utm_medium=rss&utm_campaign=spqr)
 <!-- BLOG-POST-LIST:END -->
 
 
