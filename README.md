@@ -19,8 +19,7 @@ My own [blog](http://robertforpresent.de/)
 <a href="https://discord.gg/7XaYApEs" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/discord.svg" alt="7XaYApEs" height="30" width="40" /></a>
 <a href="/http://robertforpresent.de/feed/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/rss.svg" alt="http://robertforpresent.de/feed/" height="30" width="40" /></a>
 <a href="https://patreon.com/RobertForFuture"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Faceasin-patreon.herokuapp.com%2FRobertForFuture&color=FF5441&label=Patreon&logo=Patreon&logoColor=FF5441&style=for-the-badge" alt="Patreon"> </a>
-<a href="https://ko-fi.com/robertforfuture"> KoFi </a>
-<a href="https://rmeissner2021.itch.io"> KoFi </a>
+<a href="https://rmeissner2021.itch.io"> ItchIo </a>
 </p>
 
 <h3 align="left">Languages and Tools:</h3>
@@ -34,13 +33,8 @@ My own [blog](http://robertforpresent.de/)
 
 
 
-
-
-### :fire: My Stats :
-
-[![GitHub Streak](https://streak-stats.demolab.com/?user=RobertMeissner)](https://git.io/streak-stats)
-
-[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=RobertMeissner&layout=compact&theme=vision-friendly-dark)](https://github.com/anuraghazra/github-readme-stats)
-
-
-
+<h3 align="left">Support me:</h3>
+<p align="left">
+<a href="https://patreon.com/RobertForFuture"> Patreon </a><br></br>
+<a href="https://ko-fi.com/robertforfuture"> KoFi </a>
+</p>
