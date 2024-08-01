@@ -5,12 +5,11 @@
 
 <p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/?username=robertmeissner" alt="robertmeissner" /></a> </p>
 
-
 <a href="https://github.com/anuraghazra/github-readme-stats">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/?username=robertmeissner&repo=github-readme-stats" />
+  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api?username=robertmeissner" />
 </a>
 <a href="https://github.com/anuraghazra/convoychat">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/?username=robertmeissner&repo=convoychat" />
+  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/top-langs?username=robertmeissner&layout=compact&langs_count=8&card_width=320" />
 </a>
 
 <a href="https://github.com/anuraghazra/github-readme-stats">
