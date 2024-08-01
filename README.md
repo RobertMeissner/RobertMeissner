@@ -1,24 +1,24 @@
 <h1 align="center">Hi 👋, I am Robert</h1>
 <h3 align="center">Product focused and outcome driven</h3>
 
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=robertmeissner&label=Profile%20views&color=0e75b6&style=flat" alt="" /> </p>
+<p align="left"> <img src="https://komarev.com/ghpvc/?username=robertmeissner&label=Profile%20views&color=0e75b6&style=flat&theme=merko" alt="" /> </p>
 
-<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=robertmeissner" alt="robertmeissner" /></a> </p>
+<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=robertmeissner&theme=merko" alt="robertmeissner" /></a> </p>
 
 <a href="https://github.com/RobertMeissner?tab=repositories">
-  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api?username=robertmeissner" />
+  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api?username=robertmeissner&theme=merko" />
 </a>
 <a href="https://github.com/RobertMeissner?tab=repositories">
-  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/top-langs?username=robertmeissner&layout=compact&langs_count=8&card_width=320" />
+  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/top-langs?username=robertmeissner&layout=compact&langs_count=8&card_width=320&theme=merko" />
 </a>
 <a href="https://github.com/RobertMeissner/TheNutHunt">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt" />
+  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt&theme=merko" />
 </a>
 <a href="https://github.com/RobertMeissner/metaqs-main">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=metaqs-main" />
+  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=metaqs-main&theme=merko" />
 </a>
 <a href="https://github.com/RobertMeissner/generating_title_and_preview">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview" />
+  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview&theme=merko" />
 </a>
 
 <h3 align="left">Connect with me:</h3>
