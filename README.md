@@ -11,13 +11,13 @@
 <a href="https://github.com/RobertMeissner?tab=repositories">
   <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/top-langs?username=robertmeissner&layout=compact&langs_count=8&card_width=320" />
 </a>
-<a href="https://github.com/RobertMeissner?tab=repositories">
+<a href="https://github.com/RobertMeissner/TheNutHunt">
   <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt" />
 </a>
-<a href="https://github.com/RobertMeissner?tab=repositories">
+<a href="https://github.com/RobertMeissner/metaqs-main">
   <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=metaqs-main" />
 </a>
-<a href="https://github.com/RobertMeissner?tab=repositories">
+<a href="https://github.com/RobertMeissner/generating_title_and_preview">
   <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview" />
 </a>
 
