@@ -29,6 +29,13 @@
 <a href="https://github.com/RobertMeissner?tab=repositories">
   <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/top-langs?username=robertmeissner&layout=compact&langs_count=8&card_width=320&theme=merko" />
 </a>
+
+<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=robertmeissner&theme=merko" alt="robertmeissner" /></p>
+
+
+<h3 align="left">Nice repos:</h3>
+
+
 <a href="https://github.com/RobertMeissner/TheNutHunt">
   <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt&theme=merko" />
 </a>
@@ -38,8 +45,6 @@
 <a href="https://github.com/RobertMeissner/generating_title_and_preview">
   <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview&theme=merko" />
 </a>
-<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=robertmeissner&theme=merko" alt="robertmeissner" /></p>
-
 
 ### Blogs posts
 My own [blog](https://robertforpresent.de/)
