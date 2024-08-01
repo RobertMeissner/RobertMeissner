@@ -39,6 +39,9 @@
 
 
 
+[![Harlok's WakaTime stats](https://github-readme-stats.vercel.app/api/wakatime?username=robertmeissner)](https://github.com/anuraghazra/github-readme-stats)
+[![Harlok's WakaTime stats](https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/wakatime?username=robertmeissner)](https://github.com/anuraghazra/github-readme-stats)
+
 
 ### Blogs posts
 My own [blog](https://robertforpresent.de/)
