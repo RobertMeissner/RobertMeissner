@@ -49,10 +49,10 @@
 ### Blogs posts
 My own [blog](https://robertforpresent.de/)
 <!-- BLOG-POST-LIST:START -->
+- [And then they move their body to walk](https://robertforpresent.de/science-fiction/and-then-they-move-their-body-to-walk/?utm_source=rss&utm_medium=rss&utm_campaign=and-then-they-move-their-body-to-walk)
 - [Tjarus Erbe](https://robertforpresent.de/science-fiction/tjarus-erbe/?utm_source=rss&utm_medium=rss&utm_campaign=tjarus-erbe)
 - [Velvet – Alpha](https://robertforpresent.de/science-fiction/velvet-alpha/?utm_source=rss&utm_medium=rss&utm_campaign=velvet-alpha)
 - [Supraraum](https://robertforpresent.de/science-fiction/supraraum/?utm_source=rss&utm_medium=rss&utm_campaign=supraraum)
-- [Opa ist tot.](https://robertforpresent.de/science-fiction/opa-ist-tot/?utm_source=rss&utm_medium=rss&utm_campaign=opa-ist-tot)
 <!-- BLOG-POST-LIST:END -->
 
 
