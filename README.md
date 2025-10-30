@@ -1,63 +1,149 @@
-<h1 align="center">Hi 👋, I am Robert</h1>
-<h3 align="center">Product focused and outcome driven</h3>
+<div align="center">
 
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=robertmeissner&label=Profile%20views&color=0e75b6&style=flat&theme=merko" alt="" /> </p>
+# 👋 Hi, I'm Robert Meißner
 
-<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=robertmeissner&theme=onestar&column=5" alt="robertmeissner" /></a> </p>
+### Product-Focused Engineer | Outcome-Driven Developer | Tech Enthusiast
 
-
-
-<h3 align="left">Connect with me:</h3>
-<p align="left">
-<a href="https://twitter.com/robertfpresent" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/twitter.svg" alt="robertfpresent" height="30" width="40" /></a>
-<a href="https://linkedin.com/in/robertmei%c3%9fner" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="robertmei%c3%9fner" height="30" width="40" /></a>
-<a href="https://discord.gg/7XaYApEs" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/discord.svg" alt="7XaYApEs" height="30" width="40" /></a>
-<a href="https://robertforpresent.de/feed/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/rss.svg" alt="http://robertforpresent.de/feed/" height="30" width="40" /></a>
-<a href="https://rmeissner2021.itch.io"> <img align="center" src="https://jessemillar.github.io/available-on-itchio-badge/badge-color.png" height="30" width="40" /> </a>
+<p>
+  <a href="https://twitter.com/robertfpresent">
+    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Twitter" />
+  </a>
+  <a href="https://linkedin.com/in/robertmeißner">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
+  </a>
+  <a href="https://discord.gg/7XaYApEs">
+    <img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />
+  </a>
+  <a href="https://robertforpresent.de">
+    <img src="https://img.shields.io/badge/Blog-FF5722?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
+  </a>
+  <a href="https://rmeissner2021.itch.io">
+    <img src="https://img.shields.io/badge/Itch.io-FA5C5C?style=for-the-badge&logo=itch.io&logoColor=white" alt="Itch.io" />
+  </a>
 </p>
 
-📫 or simply **info@robertforpresent.de**
+<p>
+  <img src="https://komarev.com/ghpvc/?username=robertmeissner&label=Profile%20Views&color=0e75b6&style=for-the-badge" alt="Profile Views" />
+</p>
 
-<h3 align="left">Languages and Tools:</h3>
-<p align="left"> <a href="https://azure.microsoft.com/en-in/" target="_blank" rel="noreferrer"> <img src="https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-icon.svg" alt="azure" width="40" height="40"/> </a> <a href="https://www.gnu.org/software/bash/" target="_blank" rel="noreferrer"> <img src="https://www.vectorlogo.zone/logos/gnu_bash/gnu_bash-icon.svg" alt="bash" width="40" height="40"/> </a> <a href="https://www.docker.com/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original-wordmark.svg" alt="docker" width="40" height="40"/> </a> <a href="https://flask.palletsprojects.com/" target="_blank" rel="noreferrer"> <img src="https://www.vectorlogo.zone/logos/pocoo_flask/pocoo_flask-icon.svg" alt="flask" width="40" height="40"/> </a> <a href="https://grafana.com" target="_blank" rel="noreferrer"> <img src="https://www.vectorlogo.zone/logos/grafana/grafana-icon.svg" alt="grafana" width="40" height="40"/> </a> <a href="https://www.linux.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/linux/linux-original.svg" alt="linux" width="40" height="40"/> </a> <a href="https://www.mathworks.com/" target="_blank" rel="noreferrer"> <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Matlab_Logo.png" alt="matlab" width="40" height="40"/> </a> <a href="https://pandas.pydata.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/2ae2a900d2f041da66e950e4d48052658d850630/icons/pandas/pandas-original.svg" alt="pandas" width="40" height="40"/> </a> <a href="https://postman.com" target="_blank" rel="noreferrer"> <img src="https://www.vectorlogo.zone/logos/getpostman/getpostman-icon.svg" alt="postman" width="40" height="40"/> </a> <a href="https://reactjs.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original-wordmark.svg" alt="react" width="40" height="40"/> </a> <a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/typescript/typescript-original.svg" alt="typescript" width="40" height="40"/> </a> <a href="https://zapier.com" target="_blank" rel="noreferrer"> <img src="https://www.vectorlogo.zone/logos/zapier/zapier-icon.svg" alt="zapier" width="40" height="40"/> </a> </p>
+</div>
 
+---
 
-<h3 align="left">Stats:</h3>
-<a href="https://github.com/RobertMeissner?tab=repositories">
-  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api?username=robertmeissner&theme=merko" />
-</a>
-<a href="https://github.com/RobertMeissner?tab=repositories">
-  <img height=200 align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/top-langs?username=robertmeissner&layout=compact&langs_count=8&card_width=320&theme=merko" />
-</a>
+## 🚀 About Me
 
-<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=robertmeissner&theme=merko" alt="robertmeissner" /></p>
+I'm a product-focused software engineer who believes in building solutions that deliver real value. I combine technical expertise with a strong understanding of business outcomes to create impactful products.
 
+📧 **Contact:** info@robertforpresent.de
 
-<h3 align="left">Nice repos:</h3>
+---
 
+## 💻 Tech Stack
+
+<div align="center">
+
+### Languages & Frameworks
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
+
+### Tools & Platforms
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Azure](https://img.shields.io/badge/Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
+
+### Data & Analytics
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![MATLAB](https://img.shields.io/badge/MATLAB-0076A8?style=for-the-badge&logo=mathworks&logoColor=white)
+
+</div>
+
+---
+
+## 📊 GitHub Statistics
+
+<div align="center">
+
+<img width="49%" src="https://github-readme-stats.vercel.app/api?username=robertmeissner&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" alt="GitHub Stats" />
+<img width="49%" src="https://github-readme-streak-stats.herokuapp.com/?user=robertmeissner&theme=tokyonight&hide_border=true" alt="GitHub Streak" />
+
+<img width="60%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=robertmeissner&layout=compact&theme=tokyonight&hide_border=true&langs_count=10" alt="Top Languages" />
+
+</div>
+
+---
+
+## 🏆 GitHub Achievements
+
+<div align="center">
+
+<img src="https://github-profile-trophy.vercel.app/?username=robertmeissner&theme=tokyonight&no-frame=true&row=1&column=7&margin-w=15&margin-h=15" alt="GitHub Trophies" />
+
+</div>
+
+---
+
+## 🌟 Featured Projects
+
+<div align="center">
 
 <a href="https://github.com/RobertMeissner/TheNutHunt">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt&theme=merko" />
+  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt&theme=tokyonight&hide_border=true" alt="TheNutHunt" />
 </a>
 <a href="https://github.com/RobertMeissner/metaqs-main">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=metaqs-main&theme=merko" />
-</a>
-<a href="https://github.com/RobertMeissner/generating_title_and_preview">
-  <img align="center" src="https://github-readme-stats-roberts-projects-e5e24f97.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview&theme=merko" />
+  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=metaqs-main&theme=tokyonight&hide_border=true" alt="metaqs-main" />
 </a>
 
-### Blogs posts
-My own [blog](https://robertforpresent.de/)
+<a href="https://github.com/RobertMeissner/generating_title_and_preview">
+  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview&theme=tokyonight&hide_border=true" alt="generating_title_and_preview" />
+</a>
+
+</div>
+
+---
+
+## 📝 Latest Blog Posts
+
+<div align="center">
+
+🔗 Check out my blog at [robertforpresent.de](https://robertforpresent.de/)
+
+</div>
+
 <!-- BLOG-POST-LIST:START -->
-- [Beyond If’s: Approaching the Gilded Rose Kata holistically](https://robertforpresent.de/programmieren/beyond-ifs-approaching-the-gilded-rose-kata-holistically/?utm_source=rss&utm_medium=rss&utm_campaign=beyond-ifs-approaching-the-gilded-rose-kata-holistically)
+- [Beyond If's: Approaching the Gilded Rose Kata holistically](https://robertforpresent.de/programmieren/beyond-ifs-approaching-the-gilded-rose-kata-holistically/?utm_source=rss&utm_medium=rss&utm_campaign=beyond-ifs-approaching-the-gilded-rose-kata-holistically)
 - [And then they move their body to walk](https://robertforpresent.de/science-fiction/and-then-they-move-their-body-to-walk/?utm_source=rss&utm_medium=rss&utm_campaign=and-then-they-move-their-body-to-walk)
 - [Tjarus Erbe](https://robertforpresent.de/science-fiction/tjarus-erbe/?utm_source=rss&utm_medium=rss&utm_campaign=tjarus-erbe)
 - [Velvet – Alpha](https://robertforpresent.de/science-fiction/velvet-alpha/?utm_source=rss&utm_medium=rss&utm_campaign=velvet-alpha)
 <!-- BLOG-POST-LIST:END -->
 
+---
 
-<h3 align="left">Support me:</h3>
-<p align="left">
-<a href="https://patreon.com/RobertForFuture"> Patreon </a><br></br>
-<a href="https://ko-fi.com/robertforfuture"> KoFi </a>
-</p>
+## 💖 Support My Work
+
+<div align="center">
+
+If you find my projects helpful or enjoy my content, consider supporting me:
+
+<a href="https://patreon.com/RobertForFuture">
+  <img src="https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white" alt="Patreon" />
+</a>
+<a href="https://ko-fi.com/robertforfuture">
+  <img src="https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" />
+</a>
+
+</div>
+
+---
+
+<div align="center">
+
+### 💡 "Building products that matter, one commit at a time"
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" alt="Footer" />
+
+</div>
