@@ -2,17 +2,11 @@
 
 # 👋 Hi, I'm Robert Meißner
 
-### Product-Focused Engineer | Outcome-Driven Developer | Tech Enthusiast
+### Outcome-Oriented Engineer | Product-Focussed Developer | Tech Enthusiast
 
 <p>
-  <a href="https://twitter.com/robertfpresent">
-    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Twitter" />
-  </a>
   <a href="https://linkedin.com/in/robertmeißner">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
-  </a>
-  <a href="https://discord.gg/7XaYApEs">
-    <img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />
   </a>
   <a href="https://robertforpresent.de">
     <img src="https://img.shields.io/badge/Blog-FF5722?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
@@ -30,9 +24,10 @@
 
 ---
 
-## 🚀 About Me
+## About Me
 
-I'm a product-focused software engineer who believes in building solutions that deliver real value. I combine technical expertise with a strong understanding of business outcomes to create impactful products.
+I'm a product-focused software engineer who believes in building solutions that deliver real value. 
+I combine technical expertise with a strong understanding of business outcomes to create impactful products.
 
 📧 **Contact:** info@robertforpresent.de
 
@@ -54,7 +49,6 @@ I'm a product-focused software engineer who believes in building solutions that 
 ![Azure](https://img.shields.io/badge/Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
-![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
 
 ### Data & Analytics
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
@@ -91,26 +85,28 @@ I'm a product-focused software engineer who believes in building solutions that 
 
 <div align="center">
 
-<a href="https://github.com/RobertMeissner/TheNutHunt">
-  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt&theme=tokyonight&hide_border=true" alt="TheNutHunt" />
+<a href="https://github.com/RobertMeissner/obsidian-long-sentence-highlighter">
+  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=obsidian-long-sentence-highlighter&theme=tokyonight&hide_border=true" alt="Long Sentence Highlighter in Obsidian" />
 </a>
-<a href="https://github.com/RobertMeissner/metaqs-main">
-  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=metaqs-main&theme=tokyonight&hide_border=true" alt="metaqs-main" />
+<a href="https://github.com/RobertMeissner/company_rating">
+  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=company_rating&theme=tokyonight&hide_border=true" alt="CompanyRating" />
 </a>
 
 <a href="https://github.com/RobertMeissner/generating_title_and_preview">
   <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=generating_title_and_preview&theme=tokyonight&hide_border=true" alt="generating_title_and_preview" />
 </a>
-
+<a href="https://github.com/RobertMeissner/TheNutHunt">
+  <img width="49%" src="https://github-readme-stats.vercel.app/api/pin/?username=robertmeissner&repo=TheNutHunt&theme=tokyonight&hide_border=true" alt="TheNutHunt" />
+</a>
 </div>
 
 ---
 
-## 📝 Latest Blog Posts
+## Personal Blog
 
 <div align="center">
 
-🔗 Check out my blog at [robertforpresent.de](https://robertforpresent.de/)
+🔗 Check out my personal blog at [robertforpresent.de](https://robertforpresent.de/)
 
 </div>
 
