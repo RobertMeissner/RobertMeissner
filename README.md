@@ -8,12 +8,6 @@
   <a href="https://linkedin.com/in/robertmeißner">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
   </a>
-  <a href="https://robertforpresent.de">
-    <img src="https://img.shields.io/badge/Blog-FF5722?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
-  </a>
-  <a href="https://rmeissner2021.itch.io">
-    <img src="https://img.shields.io/badge/Itch.io-FA5C5C?style=for-the-badge&logo=itch.io&logoColor=white" alt="Itch.io" />
-  </a>
 </p>
 
 <p>
@@ -29,7 +23,7 @@
 I'm a product-focused software engineer who believes in building solutions that deliver real value. 
 I combine technical expertise with a strong understanding of business outcomes to create impactful products.
 
-📧 **Contact:** info@robertforpresent.de
+📧 **Contact:** robert.meissner.ai@gmail.com
 
 ---
 
@@ -38,8 +32,8 @@ I combine technical expertise with a strong understanding of business outcomes t
 <div align="center">
 
 ### Languages & Frameworks
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](#)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
@@ -105,7 +99,11 @@ I combine technical expertise with a strong understanding of business outcomes t
 
 <div align="center">
 
-🔗 Check out my personal blog at [robertforpresent.de](https://robertforpresent.de/)
+  <a href="https://robertforpresent.de">
+    <img src="https://img.shields.io/badge/Blog-FF5722?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
+  </a>
+
+🔗 Check out my personal blog at [robertforpresent.de](https://robertforpresent.de/) with topics that interest me privately.
 
 </div>
 
@@ -115,6 +113,18 @@ I combine technical expertise with a strong understanding of business outcomes t
 - [Tjarus Erbe](https://robertforpresent.de/science-fiction/tjarus-erbe/?utm_source=rss&utm_medium=rss&utm_campaign=tjarus-erbe)
 - [Velvet – Alpha](https://robertforpresent.de/science-fiction/velvet-alpha/?utm_source=rss&utm_medium=rss&utm_campaign=velvet-alpha)
 <!-- BLOG-POST-LIST:END -->
+
+📧 **Contact:** info@robertforpresent.de
+
+---
+
+## Games
+
+I have published a tiny game made with Godot 4 on itch.io
+
+  <a href="https://rmeissner2021.itch.io">
+    <img src="https://img.shields.io/badge/Itch.io-FA5C5C?style=for-the-badge&logo=itch.io&logoColor=white" alt="Itch.io" />
+  </a>
 
 ---
 
