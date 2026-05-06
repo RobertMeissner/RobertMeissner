@@ -12,7 +12,15 @@
 
 <p>
   <img src="https://komarev.com/ghpvc/?username=robertmeissner&label=Profile%20Views&color=0e75b6&style=for-the-badge" alt="Profile Views" />
+
 </p>
+
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&duration=3000&pause=1000&color=00FF00&background=000000&center=true&vCenter=true&width=500&lines=Full+Stack+Developer;Scientist;Tech+Enthusiast" alt="Typing SVG" />
+</p>
+
+![GitHub followers](https://img.shields.io/github/followers/robertmeissner?style=social)
+![GitHub stars](https://img.shields.io/github/stars/robertmeissner?style=social)
 
 </div>
 
@@ -35,7 +43,7 @@ I combine technical expertise with a strong understanding of business outcomes t
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](#)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 
 ### Tools & Platforms
@@ -52,15 +60,7 @@ I combine technical expertise with a strong understanding of business outcomes t
 
 ---
 
-## 📊 GitHub Statistics
 
-<div align="center">
-
-<img width="49%" src="https://github-readme-stats.vercel.app/api?username=robertmeissner&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" alt="GitHub Stats" />
-
-<img width="60%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=robertmeissner&layout=compact&theme=tokyonight&hide_border=true&langs_count=10&cache_seconds=1800" alt="Top Languages" />
-
-</div>
 
 ---
 
