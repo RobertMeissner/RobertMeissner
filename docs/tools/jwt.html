@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tools — JWT Parser / Viewer</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/talos.css" />
+</head>
+<body class="talos tool-page">
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <main class="terminal tool">
+    <p class="boot"><a class="back" href="../index.html">&#9664; INDEX</a> — TOOLS / JWT PARSER</p>
+    <h1 class="tool-title">JWT</h1>
+    <p class="notice">Local only: the token is decoded in your browser. Nothing is sent anywhere and nothing is stored.</p>
+
+    <label class="field-label" for="jwt-input">TOKEN</label>
+    <textarea id="jwt-input" rows="4" spellcheck="false" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+
+    <div class="btn-row">
+      <button id="btn-decode" type="button">DECODE</button>
+      <button id="btn-clear" type="button" class="ghost">CLEAR</button>
+    </div>
+    <p id="error" class="error" role="alert"></p>
+
+    <section id="output" class="hidden">
+      <h2 class="menu-header">── HEADER ──</h2>
+      <pre id="out-header" class="out"></pre>
+
+      <h2 class="menu-header">── PAYLOAD ──</h2>
+      <pre id="out-payload" class="out"></pre>
+      <div id="claims" class="claims"></div>
+
+      <h2 class="menu-header">── SIGNATURE ──</h2>
+      <pre id="out-signature" class="out small"></pre>
+
+      <h2 class="menu-header">── VERIFY ──</h2>
+      <p class="hint-line">algorithm: <span id="alg"></span></p>
+      <label class="field-label" id="secret-label" for="secret">SECRET (HS*)</label>
+      <input id="secret" type="password" autocomplete="off" />
+      <label class="field-label hidden" id="pubkey-label" for="pubkey">PUBLIC KEY PEM (RS* / ES* / PS*)</label>
+      <textarea id="pubkey" rows="5" spellcheck="false" class="hidden"></textarea>
+      <div class="btn-row">
+        <button id="btn-verify" type="button">VERIFY SIGNATURE</button>
+      </div>
+      <p id="verify-result"></p>
+    </section>
+  </main>
+
+  <script type="module" src="../js/jwt.js"></script>
+</body>
+</html>
