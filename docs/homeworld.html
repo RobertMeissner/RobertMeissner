@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homeworld — three.js intro</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud" class="hidden">
+    <span id="score">Orbs 0 / 10</span>
+    <span class="hint">Steer with mouse or WASD / arrow keys — collect all 10 orbs</span>
+  </div>
+
+  <div id="intro">
+    <div class="panel">
+      <h1>HOMEWORLD</h1>
+      <p>A tiny three.js intro. Collect the 10 power orbs orbiting your home planet.</p>
+      <button id="start" type="button">CLICK TO START</button>
+    </div>
+  </div>
+
+  <div id="win" class="hidden">
+    <div class="panel">
+      <h1>HOMEWORLD SECURED</h1>
+      <p>All 10 orbs collected. Your planet is safe... for now.</p>
+      <button id="restart" type="button">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/homeworld.js"></script>
+</body>
+</html>

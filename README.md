@@ -126,6 +126,8 @@ I have published a tiny game made with Godot 4 on itch.io
     <img src="https://img.shields.io/badge/Itch.io-FA5C5C?style=for-the-badge&logo=itch.io&logoColor=white" alt="Itch.io" />
   </a>
 
+🌐 Or play a tiny **three.js homeworld intro** directly on my GitHub Pages: [robertmeissner.github.io/RobertMeissner](https://robertmeissner.github.io/RobertMeissner/)
+
 ---
 
 ## 💖 Support My Work

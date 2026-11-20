@@ -1,0 +1,153 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: #050510;
+  color: #e8ecff;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+#app,
+#app canvas {
+  position: fixed;
+  inset: 0;
+}
+
+.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#intro,
+#win {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(10, 12, 40, 0.55), rgba(3, 3, 12, 0.92));
+  transition: opacity 0.8s ease;
+}
+
+.panel {
+  text-align: center;
+  padding: 2.5rem 3rem;
+  border: 1px solid rgba(120, 160, 255, 0.35);
+  border-radius: 14px;
+  background: rgba(8, 10, 30, 0.72);
+  box-shadow: 0 0 40px rgba(60, 110, 255, 0.25);
+}
+
+.panel h1 {
+  font-size: 2.4rem;
+  letter-spacing: 0.35em;
+  margin-bottom: 0.8rem;
+  color: #9fc7ff;
+  text-shadow: 0 0 18px rgba(90, 150, 255, 0.8);
+}
+
+.panel p {
+  color: #aab4d8;
+  margin-bottom: 1.4rem;
+}
+
+button,
+.btn {
+  display: inline-block;
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #050510;
+  background: linear-gradient(135deg, #66ffcc, #4aa3ff);
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+#hud {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-family: "Fira Code", ui-monospace, monospace;
+  transition: opacity 0.5s;
+}
+
+#score {
+  font-size: 1.1rem;
+  color: #66ffcc;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: #7783a8;
+}
+
+body.landing {
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #101736, #050510 70%);
+}
+
+.card {
+  text-align: center;
+  padding: 3rem;
+  max-width: 34rem;
+  border: 1px solid rgba(120, 160, 255, 0.3);
+  border-radius: 16px;
+  background: rgba(8, 10, 30, 0.7);
+}
+
+.card h1 {
+  letter-spacing: 0.2em;
+  color: #9fc7ff;
+  margin-bottom: 0.6rem;
+}
+
+.card .sub {
+  color: #aab4d8;
+  margin-bottom: 1.6rem;
+}
+
+.card .links {
+  margin-top: 1.6rem;
+  font-size: 0.9rem;
+}
+
+.card .links a {
+  color: #66ffcc;
+  text-decoration: none;
+}
+
+.card .links a:hover {
+  text-decoration: underline;
+}
