@@ -83,6 +83,47 @@ function buildBook(book) {
   return el;
 }
 
+function buildFiller(seed) {
+  const hash = hashCode(`filler-${seed}`);
+  const el = document.createElement("span");
+  el.className = "book filler";
+  el.setAttribute("aria-hidden", "true");
+  el.style.setProperty("--h", `${195 + (hash % 3) * 20}px`);
+  el.style.setProperty("--w", "80px");
+  el.style.setProperty("--d", `${18 + ((hash >> 4) % 3) * 5}px`);
+  el.style.setProperty("--hue", `${hash % 360}`);
+
+  const front = document.createElement("span");
+  front.className = "face front";
+  const spine = document.createElement("span");
+  spine.className = "face spine";
+  const spineText = document.createElement("span");
+  spineText.className = "spine-text";
+  spineText.textContent = " ";
+  spine.appendChild(spineText);
+  const back = document.createElement("span");
+  back.className = "face back";
+
+  el.append(front, spine, back);
+  return el;
+}
+
+function fillShelves() {
+  const gap = 3;
+  for (const row of shelvesEl.querySelectorAll(".shelf-row")) {
+    row.querySelectorAll(".book.filler").forEach((filler) => filler.remove());
+    let seed = 0;
+    let remaining = row.clientWidth - row.scrollWidth;
+    while (remaining > 20 && seed < 80) {
+      const filler = buildFiller(`${row.parentElement.dataset.shelf}-${seed}`);
+      row.appendChild(filler);
+      remaining = row.clientWidth - row.scrollWidth;
+      if (remaining <= gap) break;
+      seed++;
+    }
+  }
+}
+
 function buildShelf(shelfName, books) {
   const section = document.createElement("section");
   section.className = "shelf";
@@ -164,6 +205,7 @@ function applyFilter() {
     section.classList.toggle("empty", shelfVisible === 0);
   }
   countEl.textContent = query ? `${visible} of ${total} books` : `${total} books`;
+  fillShelves();
 }
 
 async function load() {
@@ -179,7 +221,14 @@ async function load() {
     shelvesEl.innerHTML = `<p class="loading">could not load the library (${err.message}).</p>`;
   }
   applyFilter();
+  fillShelves();
 }
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(fillShelves, 150);
+});
 
 filterEl.addEventListener("input", applyFilter);
 modalClose.addEventListener("click", closeModal);
