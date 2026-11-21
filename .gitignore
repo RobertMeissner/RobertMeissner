@@ -1,2 +1,8 @@
 .idea
 node_modules/
+
+.quartz/
+site/
+blog/public/
+tsconfig.tsbuildinfo
+
