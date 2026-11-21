@@ -1,0 +1,46 @@
+name: Fetch book covers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/books/books.json"
+      - "scripts/fetch-book-covers.mjs"
+      - ".github/workflows/books.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "book-covers"
+  cancel-in-progress: true
+
+jobs:
+  covers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download missing book covers
+        run: node scripts/fetch-book-covers.mjs
+
+      - name: Commit covers and manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/books/covers docs/books/manifest.json
+          if git diff --cached --quiet; then
+            echo "nothing new to commit"
+          else
+            git commit -m "chore(books): fetch book covers"
+            git push origin HEAD:main
+          fi
