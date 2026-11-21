@@ -1,12 +1,16 @@
-let ctx = null;
+let ctx: AudioContext | null = null;
 
-export function ensureAudio() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+export function ensureAudio(): AudioContext {
+  if (!ctx) {
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) throw new Error("WebAudio not supported");
+    ctx = new AC();
+  }
   if (ctx.state === "suspended") ctx.resume();
   return ctx;
 }
 
-export function beep(freq = 440, dur = 0.08, type = "square", vol = 0.05, slide = 0) {
+export function beep(freq = 440, dur = 0.08, type: OscillatorType = "square", vol = 0.05, slide = 0): void {
   try {
     const a = ensureAudio();
     const o = a.createOscillator();
@@ -22,6 +26,6 @@ export function beep(freq = 440, dur = 0.08, type = "square", vol = 0.05, slide 
   } catch (e) {}
 }
 
-export function chord(freqs, dur = 0.25, type = "triangle", vol = 0.06) {
+export function chord(freqs: number[], dur = 0.25, type: OscillatorType = "triangle", vol = 0.06): void {
   freqs.forEach((f, i) => setTimeout(() => beep(f, dur, type, vol), i * 45));
 }
