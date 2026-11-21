@@ -17,22 +17,22 @@
     <p class="ph-sub">an incremental brick empire — from a single brick to a monument</p>
   </header>
 
-  <main class="ph-wrap">
-    <section class="ph-left">
+  <main class="ph-stage">
+    <section class="ph-scene">
+      <div class="ph-hud">
+        <div class="chip big"><span>BRICKS</span><b id="bricks">0</b></div>
+        <div class="chip"><span>PER SECOND</span><b id="bps">0</b></div>
+        <div class="chip"><span>PER CLICK</span><b id="bpc">1</b></div>
+        <div class="chip"><span>LAYER</span><b id="layer">0</b></div>
+        <div class="chip"><span>AGE</span><b id="age">Predynastic</b></div>
+        <div class="chip"><span>LEGACY</span><b id="legacy">0</b></div>
+        <div class="chip"><span>ACHIEVEMENTS</span><b id="achCount">0 / 10</b></div>
+      </div>
       <canvas id="scene" width="640" height="420"></canvas>
       <button id="carveBtn" type="button">&#9935; CARVE A BRICK</button>
-      <div class="ph-stats">
-        <div><span>BRICKS</span><b id="bricks">0</b></div>
-        <div><span>PER SECOND</span><b id="bps">0</b></div>
-        <div><span>PER CLICK</span><b id="bpc">1</b></div>
-        <div><span>LAYER</span><b id="layer">0</b></div>
-        <div><span>AGE</span><b id="age">Predynastic</b></div>
-        <div><span>LEGACY</span><b id="legacy">0</b></div>
-        <div><span>ACHIEVEMENTS</span><b id="achCount">0 / 10</b></div>
-      </div>
     </section>
 
-    <aside class="ph-panel">
+    <aside class="ph-side">
       <h2>CONSTRUCTION</h2>
       <div id="shop"></div>
 

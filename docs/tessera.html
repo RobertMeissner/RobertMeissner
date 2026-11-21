@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tessera — fit the bricks</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/talos.css" />
+</head>
+<body class="talos">
+  <noscript>
+    <div class="noscript-info">&#9888; JavaScript is disabled &mdash; this page needs JavaScript to run. Please enable it in your browser settings.</div>
+  </noscript>
+
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <main class="terminal tool">
+    <p class="boot"><a class="back" href="index.html">&#9664; INDEX</a> — GAMES / TESSERA</p>
+    <h1 class="tool-title">TESSERA</h1>
+    <p class="notice">Fit every brick into the glowing relic outline — exact cover, no overlaps. <b>R</b> / right-click rotates, <b>U</b> undoes, click a brick in the tray to select it. Fewer moves = more stars.</p>
+
+    <div class="game-wrap">
+      <canvas id="board" width="480" height="480"></canvas>
+      <div class="side">
+        <div class="stat">ROUND <b id="round">1</b></div>
+        <div class="stat">MOVES <b id="moves">0</b></div>
+        <div class="stat">TIME <b id="time">—</b></div>
+        <div class="stat">SCORE <b id="score">0</b></div>
+        <div class="stat">BEST <b id="best">0</b></div>
+        <div class="stat">STARS <b id="stars">0 ★</b></div>
+        <h2 class="menu-header">── BRICKS ──</h2>
+        <div id="tray" class="tray"></div>
+        <div class="btn-row">
+          <button id="undoBtn" type="button" class="ghost">UNDO (U)</button>
+          <button id="skipBtn" type="button" class="ghost">NEW RELIC</button>
+        </div>
+        <p class="hint">CLICK place &middot; R / right-click rotate &middot; U undo</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="intro">
+    <div class="panel">
+      <h1>TESSERA</h1>
+      <p>Place all bricks into the relic outline. Exact fit, no overlaps, no line-clearing — just the puzzle.</p>
+      <button id="start" type="button">CLICK TO START</button>
+    </div>
+  </div>
+
+  <div id="banner" class="hidden">
+    <div class="panel">
+      <h1 id="bannerTitle">RELIC COMPLETE</h1>
+      <p id="bannerStats"></p>
+      <button id="nextBtn" type="button">NEXT RELIC</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/tessera.js"></script>
+</body>
+</html>
