@@ -1,8 +1,11 @@
 .idea
 node_modules/
-
+public/
+prof/
 .quartz/
+.quartz-cache/
+.obsidian/
+private/
 site/
-blog/public/
 tsconfig.tsbuildinfo
-
+.DS_Store

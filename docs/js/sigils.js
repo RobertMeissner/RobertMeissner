@@ -1,6 +1,6 @@
 "use strict";
 (() => {
-  // docs/src/sfx.ts
+  // src/sfx.ts
   var ctx = null;
   function ensureAudio() {
     if (!ctx) {
@@ -31,7 +31,7 @@
     freqs.forEach((f, i) => setTimeout(() => beep(f, dur, type, vol), i * 45));
   }
 
-  // docs/src/sigils.ts
+  // src/sigils.ts
   var COLS = 10;
   var ROWS = 10;
   var SIZE = 480;

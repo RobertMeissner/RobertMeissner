@@ -5,7 +5,8 @@ on:
     branches: [main]
     paths:
       - "docs/**"
-      - "blog/**"
+      - "content/**"
+      - "quartz.config.yaml"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -30,16 +31,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install blog dependencies and plugins
+      - name: Install Quartz dependencies and plugins
         run: |
-          cd blog
           npm ci
           npx quartz plugin install
 
       - name: Build Quartz blog
         run: |
           mkdir -p "$GITHUB_WORKSPACE/site"
-          cd blog
           npx quartz build --output "$GITHUB_WORKSPACE/site/blog"
 
       - name: Add static hub

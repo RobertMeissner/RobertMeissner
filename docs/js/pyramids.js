@@ -1,6 +1,6 @@
 "use strict";
 (() => {
-  // docs/src/sfx.ts
+  // src/sfx.ts
   var ctx = null;
   function ensureAudio() {
     if (!ctx) {
@@ -31,7 +31,7 @@
     freqs.forEach((f, i) => setTimeout(() => beep(f, dur, type, vol), i * 45));
   }
 
-  // docs/src/pyramids.ts
+  // src/pyramids.ts
   var $ = (id) => document.getElementById(id);
   var canvas = $("scene");
   var ctx2 = canvas.getContext("2d");
