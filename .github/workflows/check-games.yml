@@ -1,0 +1,47 @@
+name: Games build check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/src/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - ".github/workflows/check-games.yml"
+  pull_request:
+    paths:
+      - "docs/src/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - ".github/workflows/check-games.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build game artifacts
+        run: npm run build:games
+
+      - name: Artifacts must be committed and up to date
+        run: |
+          if [ -n "$(git status --porcelain docs/js)" ]; then
+            echo "::error::docs/js artifacts are stale - run 'npm run build:games' locally and commit the result"
+            git status --porcelain docs/js
+            exit 1
+          fi

@@ -273,3 +273,61 @@ button.ghost {
 
 .ok { color: #66ffcc; }
 .bad { color: #ff7b72; }
+
+.game-wrap {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.4rem;
+  text-align: left;
+}
+
+#board {
+  background: rgba(4, 10, 9, 0.85);
+  border: 1px solid rgba(53, 240, 208, 0.35);
+  border-radius: 6px;
+  box-shadow: 0 0 30px rgba(53, 240, 208, 0.15);
+  max-width: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 160px;
+}
+
+.stat {
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: #5f8f86;
+}
+
+.stat b {
+  color: #ffb347;
+  font-size: 1.05rem;
+  margin-left: 0.5rem;
+}
+
+.next-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.next-piece,
+#hold-piece {
+  background: rgba(4, 10, 9, 0.85);
+  border: 1px solid rgba(53, 240, 208, 0.25);
+  border-radius: 4px;
+}
+
+.hint {
+  font-size: 0.65rem;
+  color: #3f6f66;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
