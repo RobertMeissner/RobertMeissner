@@ -222,6 +222,20 @@ body.pharaoh {
   color: #2a4d8f;
 }
 
+.noscript-info {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #7a4d12;
+  background: #fff3d0;
+  border-bottom: 2px solid #8a6d3b;
+}
+
 .ph-prestige {
   font-family: inherit;
   width: 100%;
