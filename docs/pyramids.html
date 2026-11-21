@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyramids — incremental</title>
+  <link rel="stylesheet" href="css/pharaoh.css" />
+</head>
+<body class="pharaoh">
+  <header class="ph-header">
+    <a class="ph-back" href="index.html">&#9664; INDEX</a>
+    <h1>&#9765; ROBERT'S PYRAMIDS</h1>
+    <p class="ph-sub">an incremental brick empire — from a single brick to a monument</p>
+  </header>
+
+  <main class="ph-wrap">
+    <section class="ph-left">
+      <canvas id="scene" width="640" height="420"></canvas>
+      <button id="carveBtn" type="button">&#9935; CARVE A BRICK</button>
+      <div class="ph-stats">
+        <div><span>BRICKS</span><b id="bricks">0</b></div>
+        <div><span>PER SECOND</span><b id="bps">0</b></div>
+        <div><span>PER CLICK</span><b id="bpc">1</b></div>
+        <div><span>LAYER</span><b id="layer">0</b></div>
+        <div><span>AGE</span><b id="age">Predynastic</b></div>
+        <div><span>LEGACY</span><b id="legacy">0</b></div>
+        <div><span>ACHIEVEMENTS</span><b id="achCount">0 / 10</b></div>
+      </div>
+    </section>
+
+    <aside class="ph-panel">
+      <h2>CONSTRUCTION</h2>
+      <div id="shop"></div>
+
+      <h2>PYRAMID</h2>
+      <div class="ph-progress"><div id="layerFill"></div></div>
+      <p class="ph-note">Next layer costs <b id="layerCost">50</b> bricks — laid automatically. <span id="frenzy"></span></p>
+
+      <h2>DYNASTY</h2>
+      <button id="prestigeBtn" type="button" class="ph-prestige">BEGIN NEW DYNASTY</button>
+      <p class="ph-note">Resets this run, grants <b id="prestigeGain">0</b> Legacy (+50% production each, forever).</p>
+      <p class="ph-note"><a href="#" id="resetLink">erase save</a></p>
+    </aside>
+  </main>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/pyramids.js"></script>
+</body>
+</html>
