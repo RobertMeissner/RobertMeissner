@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Project Hail Mary",
+    "author": "Andy Weir",
+    "isbn": "9780593135204",
+    "goodreads": "https://www.goodreads.com/book/show/54493401.Project_Hail_Mary",
+    "shelf": "reading",
+    "rating": 5
+  },
+  {
+    "title": "The Pragmatic Programmer",
+    "author": "David Thomas, Andrew Hunt",
+    "isbn": "9780135957059",
+    "goodreads": "https://www.goodreads.com/book/show/4099.The_Pragmatic_Programmer",
+    "shelf": "read",
+    "rating": 5,
+    "note": "Re-read every few years. Still the best career advice in book form."
+  },
+  {
+    "title": "Clean Code",
+    "author": "Robert C. Martin",
+    "isbn": "9780132350884",
+    "goodreads": "https://www.goodreads.com/book/show/3735293.Clean_Code",
+    "shelf": "read",
+    "rating": 4
+  },
+  {
+    "title": "Dune",
+    "author": "Frank Herbert",
+    "isbn": "9780441172719",
+    "goodreads": "https://www.goodreads.com/book/show/44767458.Dune",
+    "shelf": "want-to-read",
+    "rating": null
+  },
+  {
+    "title": "The Name of the Wind",
+    "author": "Patrick Rothfuss",
+    "goodreads": "https://www.goodreads.com/book/show/77287.The_Name_of_the_Wind",
+    "shelf": "want-to-read",
+    "rating": null
+  }
+]

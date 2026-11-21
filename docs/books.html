@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookshelf — Robert Meissner</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/books.css" />
+</head>
+<body class="books">
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <header class="books-header">
+    <p class="boot"><a class="back" href="index.html">&#9664; INDEX</a> — LIBRARY / BOOKSHELF</p>
+    <h1>BOOKSHELF</h1>
+    <p class="tagline">reading // read // want to read — hover a spine to pull a book out</p>
+    <div class="filter-row">
+      <input id="filter" type="search" placeholder="filter by title or author..." autocomplete="off" />
+      <span id="count" class="count"></span>
+    </div>
+  </header>
+
+  <main id="shelves" class="shelves">
+    <p class="loading">loading library&hellip;</p>
+  </main>
+
+  <p class="books-footer">covers are fetched by a GitHub Action into <code>docs/books/covers/</code> — add books in <code>docs/books/books.json</code></p>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <button id="modal-close" type="button" class="modal-close" aria-label="close">&times;</button>
+      <div class="modal-cover-wrap">
+        <img id="modal-cover" alt="" />
+      </div>
+      <div class="modal-info">
+        <h2 id="modal-title"></h2>
+        <p id="modal-author" class="modal-author"></p>
+        <p id="modal-shelf" class="modal-shelf"></p>
+        <p id="modal-rating" class="modal-rating" aria-label="rating"></p>
+        <p id="modal-note" class="modal-note"></p>
+        <a id="modal-link" class="modal-link" target="_blank" rel="noopener noreferrer">GOODREADS &#8599;</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/books.js"></script>
+</body>
+</html>
