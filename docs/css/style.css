@@ -105,6 +105,17 @@ button,
   color: #66ffcc;
 }
 
+#hud .hud-line {
+  font-size: 0.95rem;
+  color: #9fc7ff;
+  letter-spacing: 0.12em;
+}
+
+#hud .hud-line.lives {
+  color: #ff5c5c;
+  letter-spacing: 0.3em;
+}
+
 .hint {
   font-size: 0.75rem;
   color: #7783a8;
