@@ -8,6 +8,7 @@ configuration:
   analytics: null
   locale: de-DE
   baseUrl: robertmeissner.github.io/RobertMeissner/blog
+  publishAssets: referenced
   ignorePatterns:
     - private
     - templates
