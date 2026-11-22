@@ -391,6 +391,11 @@ button.ghost {
   height: 100%;
 }
 
+.icon-bar svg {
+  width: 100%;
+  height: 100%;
+}
+
 .tray {
   display: flex;
   flex-wrap: wrap;
