@@ -2,6 +2,7 @@
 node_modules/
 
 .quartz/
+.quartz-cache/
 site/
 blog/public/
 tsconfig.tsbuildinfo
