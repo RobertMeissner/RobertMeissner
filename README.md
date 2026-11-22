@@ -13,7 +13,7 @@
 
 <p>
   <a href="https://linkedin.com/in/robertmeißner">
-    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
+    <img src="assets/linkedin.svg" alt="LinkedIn" height="28" />
   </a>
 </p>
 
@@ -106,22 +106,16 @@ I combine technical expertise with a strong understanding of business outcomes t
 
 <div align="center">
 
-  <a href="https://robertforpresent.de">
+  <a href="https://robertmeissner.github.io/RobertMeissner/blog/">
     <img src="https://img.shields.io/badge/Blog-FF5722?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
   </a>
 
-🔗 Check out my personal blog at [robertforpresent.de](https://robertforpresent.de/) with topics that interest me privately.
+🔗 Check out my personal blog at [robertmeissner.github.io/RobertMeissner/blog](https://robertmeissner.github.io/RobertMeissner/blog/) with topics that interest me privately.
 
 </div>
 
 <!-- BLOG-POST-LIST:START -->
-- [Beyond If’s: Approaching the Gilded Rose Kata holistically](https://robertforpresent.de/programmieren/beyond-ifs-approaching-the-gilded-rose-kata-holistically/?utm_source=rss&utm_medium=rss&utm_campaign=beyond-ifs-approaching-the-gilded-rose-kata-holistically)
-- [And then they move their body to walk](https://robertforpresent.de/science-fiction/and-then-they-move-their-body-to-walk/?utm_source=rss&utm_medium=rss&utm_campaign=and-then-they-move-their-body-to-walk)
-- [Tjarus Erbe](https://robertforpresent.de/science-fiction/tjarus-erbe/?utm_source=rss&utm_medium=rss&utm_campaign=tjarus-erbe)
-- [Velvet – Alpha](https://robertforpresent.de/science-fiction/velvet-alpha/?utm_source=rss&utm_medium=rss&utm_campaign=velvet-alpha)
 <!-- BLOG-POST-LIST:END -->
-
-📧 **Contact:** info@robertforpresent.de
 
 ---
 
