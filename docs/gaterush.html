@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gate Rush — base defense</title>
+  <link rel="stylesheet" href="css/gaterush.css" />
+</head>
+<body class="gaterush">
+  <noscript>
+    <div class="noscript-info">&#9888; JavaScript is disabled &mdash; this page needs JavaScript to run. Please enable it in your browser settings.</div>
+  </noscript>
+
+  <header class="gr-header">
+    <a class="gr-back" href="index.html">&#9664; INDEX</a>
+    <h1>&#9884;&#65039; GATE RUSH <span>// TERRAN</span></h1>
+    <p class="gr-sub">last-human-style base defense &mdash; fortify the CC, survive the swarm</p>
+  </header>
+
+  <main class="gr-stage">
+    <section class="gr-scene">
+      <div class="gr-hud">
+        <div class="chip big"><span>GOLD</span><b id="gold">0</b></div>
+        <div class="chip"><span>WAVE</span><b id="wave">&mdash;</b></div>
+        <div class="chip cc-chip"><span>CC HULL</span><b id="baseHp">0</b><div class="cc-bar"><div id="baseFill"></div></div></div>
+        <div class="chip"><span>PACKS</span><b id="foes">0</b></div>
+        <div class="chip"><span>KILLS</span><b id="kills">0</b></div>
+        <div class="chip"><span>BEST</span><b id="best">0</b></div>
+      </div>
+      <div class="gr-canvas-wrap">
+        <canvas id="scene" width="960" height="540"></canvas>
+        <div id="overlay" class="gr-overlay">
+          <h2 id="ovTitle">GATE RUSH // TERRAN</h2>
+          <p id="ovText">Zerg packs pour through the four edge gates &mdash; each gate rolls an arithmetic op (+ &minus; &times; &divide;) that changes the pack's fighter count. Build walls, turrets and cannons around your Command Center, shoot barrels for gold (or let your guns pop them), tap packs to shoot them yourself, and upgrade your guns. Survive the waves!</p>
+          <button id="ovBtn" type="button">&#9654; START DEFENSE</button>
+        </div>
+      </div>
+      <div class="gr-controls">
+        <button id="pauseBtn" type="button">&#9208;&#65039; PAUSE (P)</button>
+        <button id="restartBtn" type="button">&#8635; RESTART</button>
+      </div>
+    </section>
+
+    <aside class="gr-side">
+      <h2>BUILD</h2>
+      <div id="buildList"></div>
+
+      <h2>SELECTED</h2>
+      <div id="towerPanel" class="hidden">
+        <p id="tpName" class="gr-tp-name"></p>
+        <p id="tpStats" class="gr-tp-stats"></p>
+        <div class="gr-tp-btns">
+          <button id="upBtn" type="button">&#11014; UPGRADE</button>
+          <button id="sellBtn" type="button">SELL</button>
+        </div>
+      </div>
+
+      <h2>FIELD MANUAL</h2>
+      <p class="gr-note">left-click empty tile: shoot there &middot; click a barrel or pack: shoot it</p>
+      <p class="gr-note">1-3: pick building, click tile to place &middot; click a building: select it</p>
+      <p class="gr-note">U: upgrade selected (bigger gun) &middot; X: sell &middot; ESC / right-click: cancel</p>
+      <p class="gr-note">P: pause &middot; walls soak hits, turrets pop barrels when idle. desktop recommended.</p>
+    </aside>
+  </main>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/gaterush.js"></script>
+</body>
+</html>

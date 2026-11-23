@@ -3,7 +3,7 @@
   "private": true,
   "description": "Build tooling for the static games under docs/src (served from docs/js)",
   "scripts": {
-    "build:games": "esbuild docs/src/tessera.ts docs/src/pyramids.ts docs/src/laststand.ts --bundle --format=iife --target=es2020 --outdir=docs/js",
+    "build:games": "esbuild docs/src/tessera.ts docs/src/pyramids.ts docs/src/laststand.ts docs/src/gaterush.ts --bundle --format=iife --target=es2020 --outdir=docs/js",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
