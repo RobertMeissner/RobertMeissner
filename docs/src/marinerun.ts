@@ -100,38 +100,43 @@ function banner(txt: string): void {
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(W, H, false);
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a1024);
-scene.fog = new THREE.Fog(0x0a1024, 22, 90);
+scene.background = new THREE.Color(0x1d2b5e);
+scene.fog = new THREE.Fog(0x1d2b5e, 34, 140);
 const camera = new THREE.PerspectiveCamera(70, W / H, 0.1, 220);
 camera.position.set(0, 4.6, 6.8);
 camera.lookAt(0, 1.0, -12);
 
 function box(w: number, h: number, d: number, color: number): any {
-  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ color }));
+  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ color, fog: false }));
 }
 function ball(r: number, color: number): any {
-  return new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), new THREE.MeshBasicMaterial({ color }));
+  return new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), new THREE.MeshBasicMaterial({ color, fog: false }));
 }
 
 function makeLabel(text: string, color: string): any {
   const c = document.createElement("canvas");
-  c.width = 256;
-  c.height = 72;
+  c.width = 320;
+  c.height = 90;
   const g = c.getContext("2d") as CanvasRenderingContext2D;
   const draw = (txt: string, col: string): void => {
-    g.clearRect(0, 0, 256, 72);
-    g.font = "bold 44px monospace";
+    g.clearRect(0, 0, 320, 90);
+    g.fillStyle = "rgba(8, 10, 28, 0.85)";
+    g.beginPath();
+    g.roundRect(6, 8, 308, 74, 16);
+    g.fill();
+    g.font = "bold 56px monospace";
     g.textAlign = "center";
-    g.lineWidth = 6;
-    g.strokeStyle = "rgba(0,0,0,0.9)";
-    g.strokeText(txt, 128, 50);
+    g.textBaseline = "middle";
+    g.lineWidth = 10;
+    g.strokeStyle = "rgba(0,0,0,0.95)";
+    g.strokeText(txt, 160, 47);
     g.fillStyle = col;
-    g.fillText(txt, 128, 50);
+    g.fillText(txt, 160, 47);
   };
   draw(text, color);
   const tex = new THREE.CanvasTexture(c);
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
-  sp.scale.set(2.4, 0.68, 1);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, fog: false }));
+  sp.scale.set(2.6, 0.73, 1);
   sp.userData = { canvas: c, tex, draw };
   return sp;
 }
@@ -145,41 +150,64 @@ function setLabel(sp: any, text: string, color: string): void {
   sp.userData.tex.needsUpdate = true;
 }
 
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 220), new THREE.MeshBasicMaterial({ color: 0x16121f }));
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 220), new THREE.MeshBasicMaterial({ color: 0x2c2a5e }));
+ground.material.fog = true;
 ground.rotation.x = -Math.PI / 2;
 ground.position.set(0, 0, -80);
 scene.add(ground);
 
+const laneCols = [0x3a63c9, 0x8a4fd1, 0xd14f92];
+for (let i = 0; i < 3; i++) {
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 220), new THREE.MeshBasicMaterial({ color: laneCols[i] }));
+  strip.material.fog = true;
+  strip.rotation.x = -Math.PI / 2;
+  strip.position.set(LANES[i], 0.012, -80);
+  scene.add(strip);
+}
+
+const dashCols = [0x6ee7ff, 0xffd23c, 0xff7ad9, 0x5df08a];
 const dashPool: any[] = [];
 for (let i = 0; i < 14; i++) {
-  const m = box(0.1, 0.03, 1.8, 0x3a3050);
+  const m = box(0.12, 0.035, 1.8, dashCols[i % dashCols.length]);
+  m.material.fog = true;
   m.position.set(i % 2 === 0 ? -1.2 : 1.2, 0.02, -i * 9);
   scene.add(m);
   dashPool.push(m);
 }
+const ruinCols = [0x27406b, 0x4a3a75, 0x1f5a6e, 0x6e3a4a, 0x3a6e2f];
 const ruinPool: any[] = [];
 for (let i = 0; i < 16; i++) {
   const h = 2 + Math.random() * 6;
-  const m = box(2.5 + Math.random() * 3, h, 2.5 + Math.random() * 3, 0x101828);
+  const m = box(2.5 + Math.random() * 3, h, 2.5 + Math.random() * 3, ruinCols[i % ruinCols.length]);
+  m.material.fog = true;
   m.position.set(i % 2 === 0 ? -5.6 : 5.6, h / 2, -i * 8 - Math.random() * 6);
   scene.add(m);
   ruinPool.push(m);
 }
 
+const moteCols = [0x6ee7ff, 0xffd23c, 0xff7ad9, 0x5df08a, 0xb47aff];
+const motePool: any[] = [];
+for (let i = 0; i < 26; i++) {
+  const m = ball(0.09 + Math.random() * 0.09, moteCols[i % moteCols.length]);
+  m.position.set((Math.random() - 0.5) * 20, 0.6 + Math.random() * 7, -Math.random() * 130);
+  scene.add(m);
+  motePool.push(m);
+}
+
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
-const marineBody = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.3, 0.8, 10), new THREE.MeshBasicMaterial({ color: 0xaebfd2 }));
+const marineBody = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.3, 0.8, 10), new THREE.MeshBasicMaterial({ color: 0xc4d8ea }));
 marineBody.position.y = 0.75;
 playerGroup.add(marineBody);
-const marineHead = box(0.34, 0.26, 0.34, 0x8fa3b8);
+const marineHead = box(0.34, 0.26, 0.34, 0xa8c4dd);
 marineHead.position.y = 1.28;
 playerGroup.add(marineHead);
-const gun = box(0.12, 0.12, 0.9, 0x2c3a4f);
+const gun = box(0.12, 0.12, 0.9, 0x4a6a9e);
 gun.position.set(0.25, 0.95, -0.4);
 playerGroup.add(gun);
 const squadDots: any[] = [];
 for (let i = 0; i < 8; i++) {
-  const d = ball(0.13, 0x8fa3b8);
+  const d = ball(0.13, 0xa8c4dd);
   playerGroup.add(d);
   squadDots.push(d);
 }
@@ -230,26 +258,26 @@ function spawnGateWall(z: number): void {
     if (i < nGates) {
       const g = rollGateOp();
       const good = g.op === "+" || g.op === "×";
-      const col = good ? 0x2fae5f : 0xd43a2f;
+      const col = good ? 0x2fe06e : 0xff4040;
       const postL = box(0.35, 3.4, 0.35, col);
       postL.position.set(x - 1.05, 1.7, 0);
       const postR = box(0.35, 3.4, 0.35, col);
       postR.position.set(x + 1.05, 1.7, 0);
-      const beam = box(2.45, 0.4, 0.5, col);
-      beam.position.set(x, 3.55, 0);
+      const beam = box(2.45, 0.5, 0.5, col);
+      beam.position.set(x, 3.6, 0);
       group.add(postL); group.add(postR); group.add(beam);
-      const lbl = makeLabel(g.op + g.val, good ? "#5df08a" : "#ff5f6e");
-      lbl.position.set(x, 4.35, 0);
-      lbl.scale.set(2.0, 0.56, 1);
+      const lbl = makeLabel(g.op + g.val, good ? "#6bff9e" : "#ff6b78");
+      lbl.position.set(x, 4.65, 0);
+      lbl.scale.set(2.9, 0.82, 1);
       group.add(lbl);
       gates.push({ lane, op: g.op, val: g.val });
     } else {
-      const block = box(2.2, 3.6, 0.6, 0x3a2430);
+      const block = box(2.2, 3.6, 0.6, 0x6e3050);
       block.position.set(x, 1.8, 0);
       group.add(block);
-      const lbl = makeLabel("WALL", "#ff5f6e");
-      lbl.position.set(x, 4.0, 0);
-      lbl.scale.set(1.7, 0.48, 1);
+      const lbl = makeLabel("WALL", "#ff8a94");
+      lbl.position.set(x, 4.3, 0);
+      lbl.scale.set(2.2, 0.62, 1);
       group.add(lbl);
     }
   }
@@ -260,7 +288,7 @@ function spawnPack(z: number, lane: number, count: number, type: "zergling" | "h
   const group = new THREE.Group();
   group.position.set(LANES[lane], 0, z);
   scene.add(group);
-  const color = type === "zergling" ? 0xd43a2f : type === "hydralisk" ? 0x59c94f : 0x9b59d0;
+  const color = type === "zergling" ? 0xff5040 : type === "hydralisk" ? 0x6fe86a : 0xc07aff;
   const r = type === "ultralisk" ? 1.1 : type === "hydralisk" ? 0.42 : 0.36;
   const n = Math.min(14, Math.max(4, Math.round(count / 3)));
   const balls: any[] = [];
@@ -289,7 +317,7 @@ function spawnPack(z: number, lane: number, count: number, type: "zergling" | "h
 function updatePackVisual(p: Pack): void {
   const n = Math.max(0, Math.ceil((p.count / p.maxCount) * p.balls.length));
   for (let i = 0; i < p.balls.length; i++) p.balls[i].visible = i < n;
-  const col = p.type === "zergling" ? "#ff8a7a" : p.type === "hydralisk" ? "#9fe89a" : "#d9a5ff";
+  const col = p.type === "zergling" ? "#ff7a6a" : p.type === "hydralisk" ? "#8affa0" : "#d9b3ff";
   setLabel(p.label, fmt(Math.max(0, p.count)), col);
 }
 
@@ -299,9 +327,9 @@ function spawnTargets(z: number, lane: number): void {
     const zz = z - i * 7;
     group.position.set(LANES[lane], 0, zz);
     scene.add(group);
-    const pole = box(0.1, 1.6, 0.1, 0x2c3a4f);
+    const pole = box(0.1, 1.6, 0.1, 0x4a6a9e);
     pole.position.y = 0.8;
-    const orb = ball(0.42, 0x57d7ff);
+    const orb = ball(0.42, 0x6ee7ff);
     orb.position.y = 1.8;
     group.add(pole); group.add(orb);
     const lbl = makeLabel("+5", "#57d7ff");
@@ -330,7 +358,7 @@ function spawnSpikes(z: number, lane: number): void {
   group.position.set(LANES[lane], 0, z);
   scene.add(group);
   for (let i = 0; i < 5; i++) {
-    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.7, 8), new THREE.MeshBasicMaterial({ color: 0x8a93a8 }));
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.7, 8), new THREE.MeshBasicMaterial({ color: 0xd5deee, fog: false }));
     cone.position.set((i - 2) * 0.45, 0.35, (i % 2) * 0.3 - 0.15);
     group.add(cone);
   }
@@ -388,7 +416,7 @@ function killPack(p: Pack): void {
 }
 
 function fireBullet(): void {
-  const mesh = box(0.09, 0.09, 0.7, 0xffe27a);
+  const mesh = box(0.11, 0.11, 0.9, 0xfff06a);
   mesh.position.set(S.laneX + 0.25, 0.95, -0.6);
   scene.add(mesh);
   S.bullets.push({ mesh, z: -0.6, laneX: S.laneX + 0.25 });
@@ -398,7 +426,7 @@ function fireBullet(): void {
 function fireSpine(p: Pack): void {
   const x = p.type === "ultralisk" ? S.laneX + (Math.random() - 0.5) * 0.6 : LANES[p.lane] + (Math.random() - 0.5) * 0.8;
   const y = 0.6 + Math.random() * 0.8;
-  const mesh = ball(0.14, 0xc94f9e);
+  const mesh = ball(0.16, 0xff6fb5);
   mesh.position.set(x, y, p.z);
   scene.add(mesh);
   S.spines.push({ mesh, z: p.z, x, y, vz: 20 });
@@ -687,6 +715,14 @@ function update(dt: number): void {
   for (const r of ruinPool) {
     r.position.z += S.speed * dt;
     if (r.position.z > 14) r.position.z -= 16 * 8;
+  }
+  for (const m of motePool) {
+    m.position.z += S.speed * dt * 0.6;
+    if (m.position.z > 8) {
+      m.position.z -= 138;
+      m.position.x = (Math.random() - 0.5) * 20;
+      m.position.y = 0.6 + Math.random() * 7;
+    }
   }
 
   rebuildPlayer();
