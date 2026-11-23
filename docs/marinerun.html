@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marine Run — side-scroller with math gates</title>
+  <link rel="stylesheet" href="css/marinerun.css" />
+</head>
+<body class="marinerun">
+  <noscript>
+    <div class="noscript-info">&#9888; JavaScript is disabled &mdash; this page needs JavaScript to run. Please enable it in your browser settings.</div>
+  </noscript>
+
+  <header class="mr-header">
+    <a class="mr-back" href="index.html">&#9664; INDEX</a>
+    <h1>&#9876;&#65039; MARINE RUN <span>// SIDE-SCROLLER</span></h1>
+    <p class="mr-sub">your squad auto-fires the whole run &mdash; steer through the math gates and don't hit zero</p>
+  </header>
+
+  <main class="mr-stage">
+    <section class="mr-scene">
+      <div class="mr-hud">
+        <div class="chip big"><span>FIGHTERS</span><b id="count">0</b></div>
+        <div class="chip"><span>LEVEL</span><b id="level">1</b></div>
+        <div class="chip"><span>DISTANCE</span><b id="dist">0m</b></div>
+        <div class="chip"><span>BEST</span><b id="best">0m</b></div>
+      </div>
+      <div class="mr-canvas-wrap">
+        <canvas id="scene" width="960" height="540"></canvas>
+        <div id="overlay" class="mr-overlay">
+          <h2 id="ovTitle">MARINE RUN // TERRAN</h2>
+          <p id="ovText">Side-scroller in the style of Last Human: Final Stand's runner combat. Your marine squad runs and shoots non-stop. Steer with the mouse (or W/S/arrows) through pairs of <b>math gates</b> &mdash; <b style="color:#5df08a">+N and &times;N grow your fighter count</b>, <b style="color:#ff5f6e">&minus;N and &divide;N shrink it</b>. Blast zerg packs (bigger stack wins on contact), grab +N crates, dodge spikes and spitters, and take down the Ultralisk boss at the end of each level. If your count hits 0, it's over!</p>
+          <button id="ovBtn" type="button">&#9654; START RUN</button>
+        </div>
+      </div>
+      <div class="mr-controls">
+        <button id="pauseBtn" type="button">&#9208;&#65039; PAUSE (P)</button>
+        <button id="restartBtn" type="button">&#8635; RESTART</button>
+      </div>
+    </section>
+
+    <aside class="mr-side">
+      <h2>FIELD MANUAL</h2>
+      <p class="mr-note">mouse / W-S / arrow keys: steer up &amp; down (the run is automatic, guns always firing)</p>
+      <p class="mr-note">green gates <b>+N</b> <b>&times;N</b> = grow your number &middot; red gates <b>&minus;N</b> <b>&divide;N</b> = shrink it</p>
+      <p class="mr-note">zerg packs: your number vs theirs &mdash; bigger stack wins the clash, loser is wiped</p>
+      <p class="mr-note">+N crates add fighters &middot; spikes and hydralisk/turret spines chip your count &middot; boss at each level's end</p>
+      <p class="mr-note">P: pause &middot; desktop recommended</p>
+    </aside>
+  </main>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/marinerun.js"></script>
+</body>
+</html>
