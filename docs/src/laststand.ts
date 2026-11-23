@@ -10,7 +10,7 @@ const SAVE_KEY = "rfp_laststand_best_v1";
 const CC_HP = 1200;
 const CC_R = 34;
 
-type EnemyType = "zergling" | "hydralisk" | "baneling" | "mutalisk" | "ultralisk";
+type EnemyType = "skitter" | "spitter" | "burster" | "whisp" | "behemoth";
 type BuildType = "turret" | "bunker" | "tank";
 type StructType = "cc" | BuildType;
 
@@ -22,11 +22,11 @@ interface EnemyDef {
 }
 
 const ENEMY_DEFS: Record<EnemyType, EnemyDef> = {
-  zergling:  { hp: 30,  speed: 64, dmg: 6,  range: 18,  radius: 9,  atkRate: 0.8, flying: false, ranged: false, aoe: 0,  color: "#ff5347", name: "Zergling" },
-  hydralisk: { hp: 75,  speed: 42, dmg: 10, range: 215, radius: 12, atkRate: 1.4, flying: false, ranged: true,  aoe: 0,  color: "#8ee04f", name: "Hydralisk" },
-  baneling:  { hp: 26,  speed: 88, dmg: 55, range: 16,  radius: 10, atkRate: 0,   flying: false, ranged: false, aoe: 78, color: "#c6ff4d", name: "Baneling" },
-  mutalisk:  { hp: 130, speed: 98, dmg: 13, range: 20,  radius: 11, atkRate: 0.7, flying: true,  ranged: false, aoe: 0,  color: "#c07bf2", name: "Mutalisk" },
-  ultralisk: { hp: 950, speed: 27, dmg: 65, range: 36,  radius: 26, atkRate: 1.6, flying: false, ranged: false, aoe: 0,  color: "#e0447c", name: "Ultralisk" },
+  skitter:   { hp: 30,  speed: 64, dmg: 6,  range: 18,  radius: 9,  atkRate: 0.8, flying: false, ranged: false, aoe: 0,  color: "#ff5347", name: "Skitter" },
+  spitter:   { hp: 75,  speed: 42, dmg: 10, range: 215, radius: 12, atkRate: 1.4, flying: false, ranged: true,  aoe: 0,  color: "#8ee04f", name: "Spitter" },
+  burster:   { hp: 26,  speed: 88, dmg: 55, range: 16,  radius: 10, atkRate: 0,   flying: false, ranged: false, aoe: 78, color: "#c6ff4d", name: "Burster" },
+  whisp:     { hp: 130, speed: 98, dmg: 13, range: 20,  radius: 11, atkRate: 0.7, flying: true,  ranged: false, aoe: 0,  color: "#c07bf2", name: "Whisp" },
+  behemoth:  { hp: 950, speed: 27, dmg: 65, range: 36,  radius: 26, atkRate: 1.6, flying: false, ranged: false, aoe: 0,  color: "#e0447c", name: "Behemoth" },
 };
 
 interface BuildDef {
@@ -35,20 +35,20 @@ interface BuildDef {
 }
 
 const BUILDS: BuildDef[] = [
-  { id: "turret", name: "Missile Turret", icon: "🔫", cost: 50,  desc: "rapid fire, hits air + ground",  key: "1", hp: 160, range: 175, dmg: 9,  rate: 2.2,  aoe: 0,  radius: 14, groundOnly: false },
+  { id: "turret", name: "Auto Turret", icon: "🔫", cost: 50,  desc: "rapid fire, hits air + ground",  key: "1", hp: 160, range: 175, dmg: 9,  rate: 2.2,  aoe: 0,  radius: 14, groundOnly: false },
   { id: "bunker", name: "Bunker",         icon: "🛡️", cost: 90,  desc: "tough wall that also shoots",    key: "2", hp: 650, range: 125, dmg: 6,  rate: 3.0,  aoe: 0,  radius: 17, groundOnly: false },
-  { id: "tank",   name: "Siege Tank",     icon: "💣", cost: 200, desc: "long range splash, ground only", key: "3", hp: 320, range: 265, dmg: 42, rate: 0.55, aoe: 62, radius: 17, groundOnly: true },
+  { id: "tank",   name: "Artillery",     icon: "💣", cost: 200, desc: "long range splash, ground only", key: "3", hp: 320, range: 265, dmg: 42, rate: 0.55, aoe: 62, radius: 17, groundOnly: true },
 ];
 
 interface UpgradeDef { id: string; name: string; icon: string; desc: string; key: string; base: number; mult: number; max: number; }
 
 const UPGRADES: UpgradeDef[] = [
-  { id: "scv",    name: "Train SCV",       icon: "👷", desc: "+1 SCV miner",                       key: "5", base: 75,  mult: 1.8, max: 8 },
-  { id: "mining", name: "Mining Drills",   icon: "⛏️", desc: "+4 minerals per trip, mines faster", key: "6", base: 100, mult: 2.0, max: 6 },
-  { id: "weap",   name: "Weapons Bay",     icon: "⚔️", desc: "+35% turret / bunker / tank damage", key: "7", base: 120, mult: 2.1, max: 8 },
+  { id: "scv",    name: "Hire Miner",       icon: "👷", desc: "+1 miner",                       key: "5", base: 75,  mult: 1.8, max: 8 },
+  { id: "mining", name: "Mining Drills",   icon: "⛏️", desc: "+4 salvage per trip, mines faster", key: "6", base: 100, mult: 2.0, max: 6 },
+  { id: "weap",   name: "Weapons Bay",     icon: "⚔️", desc: "+35% turret / bunker / artillery damage", key: "7", base: 120, mult: 2.1, max: 8 },
   { id: "armor",  name: "Armor Plating",   icon: "🔩", desc: "+30% hull for all structures",       key: "8", base: 150, mult: 2.1, max: 8 },
-  { id: "marine", name: "Marine Training", icon: "🪖", desc: "+45% marine damage",                 key: "9", base: 100, mult: 2.0, max: 8 },
-  { id: "repair", name: "Auto-Repair",     icon: "🔧", desc: "Command Center regenerates 2 hp/s",  key: "0", base: 150, mult: 2.2, max: 6 },
+  { id: "marine", name: "Vanguard Training", icon: "🪖", desc: "+45% vanguard damage",                 key: "9", base: 100, mult: 2.0, max: 8 },
+  { id: "repair", name: "Auto-Repair",     icon: "🔧", desc: "HQ regenerates 2 hp/s",  key: "0", base: 150, mult: 2.2, max: 6 },
 ];
 
 interface Struct { type: StructType; x: number; y: number; hp: number; maxHp: number; cd: number; angle: number; radius: number; }
@@ -161,11 +161,11 @@ function banner(txt: string): void {
 function waveComp(w: number): EnemyType[] {
   const q: EnemyType[] = [];
   const add = (t: EnemyType, c: number): void => { for (let i = 0; i < c; i++) q.push(t); };
-  add("zergling", 5 + 3 * w);
-  if (w >= 3) add("hydralisk", Math.floor(1 + w / 2));
-  if (w >= 4) add("baneling", Math.floor(w / 2));
-  if (w >= 5) add("mutalisk", Math.floor(w / 2));
-  if (w % 5 === 0) add("ultralisk", Math.max(1, Math.floor(w / 5)));
+  add("skitter", 5 + 3 * w);
+  if (w >= 3) add("spitter", Math.floor(1 + w / 2));
+  if (w >= 4) add("burster", Math.floor(w / 2));
+  if (w >= 5) add("whisp", Math.floor(w / 2));
+  if (w % 5 === 0) add("behemoth", Math.max(1, Math.floor(w / 5)));
   for (let i = q.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     const tmp = q[i]; q[i] = q[j]; q[j] = tmp;
@@ -178,7 +178,7 @@ function startWave(w: number): void {
   S.phase = "fight";
   S.spawnQueue = waveComp(w);
   S.spawnT = 0.4;
-  if (w % 5 === 0) { banner(`⚠ WAVE ${w} — ULTRALISK ⚠`); beep(70, 0.8, "sawtooth", 0.1, -30); }
+  if (w % 5 === 0) { banner(`⚠ WAVE ${w} — BEHEMOTH ⚠`); beep(70, 0.8, "sawtooth", 0.1, -30); }
   else { banner(`WAVE ${w}`); chord([440, 554, 659], 0.25, "triangle", 0.05); }
 }
 
@@ -199,7 +199,7 @@ function spawnEnemy(type: EnemyType): void {
     flying: d.flying, ranged: d.ranged, aoe: d.aoe,
     target: null, retargetT: Math.random() * 0.4, atkCd: 0, flash: 0, wob: Math.random() * 10, face: Math.PI / 2,
   });
-  if (type === "ultralisk") S.shake = Math.max(S.shake, 10);
+  if (type === "behemoth") S.shake = Math.max(S.shake, 10);
 }
 
 function pickTarget(e: Enemy): Struct {
@@ -223,7 +223,7 @@ function spark(x: number, y: number, color: string, n: number, spd = 90): void {
 }
 
 function goo(e: Enemy): void {
-  spark(e.x, e.y, ENEMY_DEFS[e.type].color, e.type === "ultralisk" ? 40 : 14, e.type === "ultralisk" ? 160 : 100);
+  spark(e.x, e.y, ENEMY_DEFS[e.type].color, e.type === "behemoth" ? 40 : 14, e.type === "behemoth" ? 160 : 100);
 }
 
 function damageEnemy(e: Enemy, dmg: number): void {
@@ -240,9 +240,9 @@ function damageEnemy(e: Enemy, dmg: number): void {
     e.hp = -1;
     S.kills++;
     goo(e);
-    if (e.type === "ultralisk") {
+    if (e.type === "behemoth") {
       S.shake = Math.max(S.shake, 14);
-      banner("ULTRALISK DOWN");
+      banner("BEHEMOTH DOWN");
       beep(60, 0.7, "sawtooth", 0.1, -25);
       chord([523, 659, 784, 1046], 0.3, "triangle", 0.05);
     } else {
@@ -273,7 +273,7 @@ function damageHero(dmg: number): void {
     h.respawnT = 8;
     spark(h.x, h.y, "#aebfd2", 24, 140);
     S.shake = Math.max(S.shake, 8);
-    banner("MARINE DOWN — respawning");
+    banner("VANGUARD DOWN — respawning");
     beep(140, 0.5, "sawtooth", 0.09, -80);
   }
 }
@@ -291,7 +291,7 @@ function explodeShell(p: Proj): void {
   beep(120, 0.25, "sawtooth", 0.07, -70);
 }
 
-function explodeBaneling(e: Enemy): void {
+function explodeBurster(e: Enemy): void {
   for (const s of S.structs) {
     const d = Math.hypot(s.x - e.x, s.y - e.y);
     if (d < e.aoe + s.radius) damageStruct(s, e.dmg * (1 - (d / (e.aoe + s.radius)) * 0.5));
@@ -321,7 +321,7 @@ function updateHero(dt: number): void {
       h.hp = h.maxHp;
       h.x = c.x - 50;
       h.y = c.y;
-      banner("MARINE REDEPLOYED");
+      banner("VANGUARD REDEPLOYED");
       chord([660, 880], 0.15, "triangle", 0.05);
     }
     return;
@@ -506,8 +506,8 @@ function updateEnemies(dt: number): void {
         e.y += (dy / d) * e.speed * dt;
       }
     } else if (d <= reach) {
-      if (e.type === "baneling") {
-        explodeBaneling(e);
+      if (e.type === "burster") {
+        explodeBurster(e);
         e.hp = -1;
       } else {
         e.atkCd -= dt;
@@ -626,7 +626,7 @@ function update(dt: number): void {
       const bonus = 40 + 10 * S.wave;
       S.minerals += bonus;
       S.earned += bonus;
-      toast(`Wave ${S.wave} cleared! +${bonus} minerals`);
+      toast(`Wave ${S.wave} cleared! +${bonus} salvage`);
       chord([523, 659, 784], 0.2, "triangle", 0.05);
       S.phase = "prep";
       S.phaseT = 10;
@@ -655,8 +655,8 @@ function gameOver(): void {
   S.shake = 20;
   beep(90, 1, "sawtooth", 0.1, -50);
   chord([330, 262, 196, 131], 0.6, "triangle", 0.06);
-  $("ovTitle").textContent = "💥 COMMAND CENTER LOST";
-  $("ovText").textContent = `The swarm overran your base on wave ${S.wave}. ${S.kills} zerg slain · ${fmt(S.earned)} minerals mined · best: wave ${best}.`;
+  $("ovTitle").textContent = "💥 HQ LOST";
+  $("ovText").textContent = `The swarm overran your base on wave ${S.wave}. ${S.kills} foes slain · ${fmt(S.earned)} salvage gathered · best: wave ${best}.`;
   ($("ovBtn") as HTMLButtonElement).textContent = "↻ REDEPLOY";
   $("overlay").classList.remove("hidden");
 }
@@ -665,7 +665,7 @@ function startGame(): void {
   reset();
   S.started = true;
   $("overlay").classList.add("hidden");
-  banner("DEFEND THE COMMAND CENTER");
+  banner("DEFEND THE HQ");
   chord([392, 523, 659], 0.3, "triangle", 0.06);
   updateHud();
 }
@@ -932,7 +932,7 @@ function drawStruct(s: Struct): void {
     ctx.fillStyle = "#35f0d0";
     ctx.font = "bold 11px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("CC", 0, 14);
+    ctx.fillText("HQ", 0, 14);
     ctx.restore();
     drawHpBar(s.x, s.y - 56, 80, s.hp / s.maxHp);
     return;
@@ -1002,7 +1002,7 @@ function drawEnemy(e: Enemy): void {
   ctx.fillStyle = flash ? "#ffffff" : def.color;
   ctx.strokeStyle = flash ? "#ffffff" : "rgba(0,0,0,0.5)";
   ctx.lineWidth = 1.5;
-  if (e.type === "zergling") {
+  if (e.type === "skitter") {
     ctx.beginPath();
     ctx.ellipse(0, 0, e.radius * 0.7, e.radius, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1011,7 +1011,7 @@ function drawEnemy(e: Enemy): void {
     ctx.moveTo(-2, -e.radius); ctx.lineTo(-6, -e.radius - 6);
     ctx.moveTo(2, -e.radius); ctx.lineTo(6, -e.radius - 6);
     ctx.stroke();
-  } else if (e.type === "hydralisk") {
+  } else if (e.type === "spitter") {
     ctx.beginPath();
     ctx.ellipse(0, 0, e.radius, e.radius * 0.75, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1025,7 +1025,7 @@ function drawEnemy(e: Enemy): void {
       ctx.closePath();
       ctx.fill();
     }
-  } else if (e.type === "baneling") {
+  } else if (e.type === "burster") {
     const pulse = 1 + 0.12 * Math.sin(e.wob * 2);
     ctx.beginPath();
     ctx.arc(0, 0, e.radius * pulse, 0, Math.PI * 2);
@@ -1035,7 +1035,7 @@ function drawEnemy(e: Enemy): void {
     ctx.beginPath();
     ctx.arc(-e.radius * 0.3, -e.radius * 0.3, e.radius * 0.25, 0, Math.PI * 2);
     ctx.fill();
-  } else if (e.type === "mutalisk") {
+  } else if (e.type === "whisp") {
     const flap = Math.sin(e.wob * 3) * 0.5;
     ctx.fillStyle = flash ? "#ffffff" : "#8a4fc0";
     ctx.beginPath();
@@ -1085,7 +1085,7 @@ function drawHero(): void {
     ctx.fillStyle = "#ffd23c";
     ctx.font = "bold 13px monospace";
     ctx.textAlign = "center";
-    ctx.fillText(`MARINE RESPAWN IN ${Math.ceil(h.respawnT)}s`, cc().x, cc().y - 60);
+    ctx.fillText(`VANGUARD RESPAWN IN ${Math.ceil(h.respawnT)}s`, cc().x, cc().y - 60);
     return;
   }
   ctx.save();
