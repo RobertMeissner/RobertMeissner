@@ -44,16 +44,31 @@
     { id: "overseer", name: "Overseer", icon: "\u{1F441}\uFE0F", desc: "+5 bricks/s", baseCost: 750 },
     { id: "quarry", name: "Quarry", icon: "\u{1FAA8}", desc: "+25 bricks/s", baseCost: 5e3 },
     { id: "architect", name: "Royal Architect", icon: "\u{1F4D0}", desc: "+150 bricks/s", baseCost: 4e4 },
-    { id: "temple", name: "Temple of Ra", icon: "\u{1F3DB}\uFE0F", desc: "+1000 bricks/s", baseCost: 5e5 }
+    { id: "barge", name: "Nile Barge", icon: "\u26F5", desc: "+60 bricks/s", baseCost: 12e4 },
+    { id: "temple", name: "Temple of Ra", icon: "\u{1F3DB}\uFE0F", desc: "+1000 bricks/s", baseCost: 5e5 },
+    { id: "sphinx", name: "Great Sphinx", icon: "\u{1F5FF}", desc: "click power \xD72", baseCost: 75e4 },
+    { id: "obelisk", name: "Obelisk", icon: "\u{1F5FC}", desc: "+15% all production", baseCost: 3e6 }
   ];
-  var AGES = ["Predynastic", "Old Kingdom", "First Intermediate", "Middle Kingdom", "New Kingdom", "Ptolemaic"];
+  var AGES = [
+    "Predynastic",
+    "Old Kingdom",
+    "First Intermediate",
+    "Middle Kingdom",
+    "New Kingdom",
+    "Second Intermediate",
+    "Late Period",
+    "Ptolemaic",
+    "Roman Egypt",
+    "Arab Conquest",
+    "Modern Age"
+  ];
   var SAVE_KEY = "rfp_pyramids_v1";
   function defaultState() {
     return {
       bricks: 0,
       totalEarned: 0,
       layer: 0,
-      buildings: { worker: 0, chisel: 0, overseer: 0, quarry: 0, architect: 0, temple: 0 },
+      buildings: { worker: 0, chisel: 0, overseer: 0, quarry: 0, architect: 0, barge: 0, temple: 0, sphinx: 0, obelisk: 0 },
       legacy: 0,
       ach: {},
       frenzyUntil: 0,
@@ -66,7 +81,14 @@
   function load() {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
-      if (raw) return Object.assign(defaultState(), JSON.parse(raw));
+      if (raw) {
+        const p = JSON.parse(raw);
+        const d = defaultState();
+        Object.assign(d, p);
+        d.buildings = Object.assign(defaultState().buildings, p.buildings ?? {});
+        d.stats = Object.assign(defaultState().stats, p.stats ?? {});
+        return d;
+      }
     } catch (e) {
     }
     return defaultState();
@@ -75,14 +97,26 @@
   var ACH = [
     { id: "first", name: "First brick carved", check: () => S.stats.clicks >= 1 },
     { id: "c100", name: "100 clicks", check: () => S.stats.clicks >= 100 },
+    { id: "c1k", name: "1,000 clicks", check: () => S.stats.clicks >= 1e3 },
     { id: "b1k", name: "1,000 bricks earned", check: () => S.totalEarned >= 1e3 },
+    { id: "b10k", name: "10,000 bricks earned", check: () => S.totalEarned >= 1e4 },
     { id: "b1m", name: "1,000,000 bricks earned", check: () => S.totalEarned >= 1e6 },
+    { id: "b100m", name: "100M bricks earned", check: () => S.totalEarned >= 1e8 },
+    { id: "b1b", name: "1B bricks earned", check: () => S.totalEarned >= 1e9 },
     { id: "w10", name: "10 workers hired", check: () => S.buildings.worker >= 10 },
+    { id: "w25", name: "25 workers hired", check: () => S.buildings.worker >= 25 },
+    { id: "ch10", name: "10 bronze chisels", check: () => S.buildings.chisel >= 10 },
+    { id: "all1", name: "Full construction crew", check: () => BUILDINGS.every((b) => S.buildings[b.id] >= 1) },
     { id: "bps100", name: "100 bricks/s", check: () => bps() >= 100 },
+    { id: "bps1k", name: "1,000 bricks/s", check: () => bps() >= 1e3 },
     { id: "l1", name: "First layer laid", check: () => S.layer >= 1 },
     { id: "l10", name: "10 layers \u2014 a true monument", check: () => S.layer >= 10 },
+    { id: "l25", name: "25 layers high", check: () => S.layer >= 25 },
+    { id: "l50", name: "50 layers \u2014 touches the sky", check: () => S.layer >= 50 },
     { id: "scarab", name: "Caught the golden scarab", check: () => S.stats.scarabs >= 1 },
-    { id: "prestige", name: "New dynasty begun", check: () => S.stats.prestiges >= 1 }
+    { id: "scarab5", name: "Scarab hunter (5 caught)", check: () => S.stats.scarabs >= 5 },
+    { id: "prestige", name: "New dynasty begun", check: () => S.stats.prestiges >= 1 },
+    { id: "prestige3", name: "Three dynasties", check: () => S.stats.prestiges >= 3 }
   ];
   function save() {
     S.savedAt = Date.now();
@@ -93,9 +127,9 @@
   }
   var legacyMult = () => 1 + 0.5 * S.legacy;
   var frenzyActive = () => Date.now() < S.frenzyUntil;
-  var bps = () => (S.buildings.worker * 1 + S.buildings.overseer * 5 + S.buildings.quarry * 25 + S.buildings.architect * 150 + S.buildings.temple * 1e3) * (frenzyActive() ? 2 : 1) * legacyMult();
-  var bpc = () => (1 + S.buildings.chisel) * legacyMult();
-  var layerCost = () => Math.ceil(50 * Math.pow(2.6, S.layer));
+  var bps = () => (S.buildings.worker * 1 + S.buildings.overseer * 5 + S.buildings.quarry * 25 + S.buildings.architect * 150 + S.buildings.barge * 60 + S.buildings.temple * 1e3) * (frenzyActive() ? 2 : 1) * Math.pow(1.15, S.buildings.obelisk) * legacyMult();
+  var bpc = () => (1 + S.buildings.chisel) * Math.pow(2, S.buildings.sphinx) * legacyMult();
+  var layerCost = () => Math.ceil(50 * Math.pow(2.3, S.layer));
   var buildingCost = (id) => {
     const b = BUILDINGS.find((x) => x.id === id);
     if (!b) return Infinity;
@@ -248,12 +282,19 @@ Reset bricks, buildings and layers, gain ${gain} Legacy (+${gain * 50}% permanen
       S.bricks += gain;
       S.totalEarned += gain;
     }
-    if (S.bricks >= layerCost()) {
+    while (S.bricks >= layerCost()) {
       S.bricks -= layerCost();
       S.layer++;
       S.frenzyUntil = now + 2e4;
       toast(`Layer ${S.layer} complete! Festival \u2014 2x production for 20s`);
       chord([523, 659, 784], 0.25, "triangle", 0.06);
+      if (S.layer % 5 === 0) {
+        const bonus = Math.ceil(layerCost() * 0.5);
+        S.bricks += bonus;
+        S.totalEarned += bonus;
+        toast(`Monument milestone at layer ${S.layer}! Bonus: ${fmt(bonus)} bricks`);
+        chord([392, 523, 659, 784, 1046], 0.35, "triangle", 0.06);
+      }
       checkAch();
     }
     if (!S.scarab && now >= S.nextScarabAt) {
@@ -269,9 +310,9 @@ Reset bricks, buildings and layers, gain ${gain} Legacy (+${gain * 50}% permanen
   setInterval(save, 5e3);
   window.addEventListener("beforeunload", save);
   function drawPyramid() {
-    const cell = 16;
-    const levelH = 22;
     const levels = S.layer;
+    const levelH = Math.min(22, (GROUND - 40) / (levels + 1));
+    const cell = Math.min(16, (W - 60) / (2 * (levels + 1) - 1));
     const cx = W / 2;
     for (let i = 0; i < levels; i++) {
       const w = (2 * (levels - i) - 1) * cell;

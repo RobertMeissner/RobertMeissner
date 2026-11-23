@@ -17,7 +17,7 @@
   <main class="terminal tool">
     <p class="boot"><a class="back" href="index.html">&#9664; INDEX</a> — GAMES / TESSERA</p>
     <h1 class="tool-title">TESSERA</h1>
-    <p class="notice">Fit every brick into the glowing relic outline — exact cover, no overlaps. <b>R</b> / right-click rotates, <b>U</b> undoes, click a brick in the tray to select it. Fewer moves = more stars.</p>
+    <p class="notice">Fit every brick into the glowing relic outline — one connected relic, exact cover, no overlaps. <b>R</b> / right-click rotates, <b>U</b> undoes, click a brick in the tray to select it. Endless relics, each wilder than the last — chain 3★ relics for streak bonuses.</p>
 
     <div class="game-wrap">
       <canvas id="board" width="480" height="480"></canvas>
@@ -28,6 +28,8 @@
         <div class="stat">SCORE <b id="score">0</b></div>
         <div class="stat">BEST <b id="best">0</b></div>
         <div class="stat">STARS <b id="stars">0 ★</b></div>
+        <div class="stat">RELICS <b id="relics">0</b></div>
+        <div class="stat">STREAK <b id="streak">0</b></div>
         <h2 class="menu-header">── BRICKS ──</h2>
         <div id="tray" class="tray"></div>
         <div class="btn-row">
@@ -42,7 +44,7 @@
   <div id="intro">
     <div class="panel">
       <h1>TESSERA</h1>
-      <p>Place all bricks into the relic outline. Exact fit, no overlaps, no line-clearing — just the puzzle.</p>
+      <p>Place all bricks into the relic outline. Exact fit, no overlaps — just the puzzle. Relics keep coming: bigger, wilder, endless. How far can you go?</p>
       <button id="start" type="button">CLICK TO START</button>
     </div>
   </div>

@@ -45,6 +45,8 @@
   var scoreEl = document.getElementById("score");
   var bestEl = document.getElementById("best");
   var starsEl = document.getElementById("stars");
+  var relicsEl = document.getElementById("relics");
+  var streakEl = document.getElementById("streak");
   var trayEl = document.getElementById("tray");
   var undoBtn = document.getElementById("undoBtn");
   var skipBtn = document.getElementById("skipBtn");
@@ -62,6 +64,8 @@
   var totalStars = 0;
   var level = 1;
   var best = Number(localStorage.getItem("rfp_tessera_best") || 0);
+  var relics = Number(localStorage.getItem("rfp_tessera_relics") || 0);
+  var streak = 0;
   var state = "intro";
   var mouseCol = -1;
   var mouseRow = -1;
@@ -96,43 +100,95 @@
     }
     return { id: p.id, cells, w, h, hue: p.hue, placed: p.placed };
   }
-  function randomShapeCells(n) {
-    const cells = [[0, 0]];
-    const set = /* @__PURE__ */ new Set(["0,0"]);
-    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    let guard = 0;
-    while (cells.length < n && guard++ < 500) {
-      const [cx, cy] = cells[Math.random() * cells.length | 0];
-      const [dx, dy] = dirs[Math.random() * 4 | 0];
-      const nx = cx + dx;
-      const ny = cy + dy;
-      if (nx < -8 || nx > 8 || ny < -8 || ny > 8) continue;
-      const k = nx + "," + ny;
-      if (set.has(k)) continue;
-      set.add(k);
-      cells.push([nx, ny]);
+  var DIRS = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1]
+  ];
+  function pickConnected(pool, total) {
+    const cells = Array.from(pool);
+    const start = cells[Math.random() * cells.length | 0];
+    const out = /* @__PURE__ */ new Set([start]);
+    const queue = [start];
+    while (queue.length > 0 && out.size < total) {
+      const cur = queue.shift();
+      const [cx, cy] = cur.split(",").map(Number);
+      const dirs = [...DIRS].sort(() => Math.random() - 0.5);
+      for (const [dx, dy] of dirs) {
+        const k = cx + dx + "," + (cy + dy);
+        if (pool.has(k) && !out.has(k)) {
+          out.add(k);
+          queue.push(k);
+          if (out.size >= total) break;
+        }
+      }
     }
-    return normalize(cells);
+    return out;
+  }
+  function largestComponent(cells) {
+    const seen = /* @__PURE__ */ new Set();
+    let best2 = /* @__PURE__ */ new Set();
+    for (const start of cells) {
+      if (seen.has(start)) continue;
+      const comp = /* @__PURE__ */ new Set([start]);
+      seen.add(start);
+      const stack = [start];
+      while (stack.length > 0) {
+        const cur = stack.pop();
+        const [cx, cy] = cur.split(",").map(Number);
+        for (const [dx, dy] of DIRS) {
+          const k = cx + dx + "," + (cy + dy);
+          if (cells.has(k) && !comp.has(k)) {
+            comp.add(k);
+            seen.add(k);
+            stack.push(k);
+          }
+        }
+      }
+      if (comp.size > best2.size) best2 = comp;
+    }
+    return best2;
+  }
+  function carvePiece(remaining, size) {
+    const comp = largestComponent(remaining);
+    const want = Math.min(size, comp.size);
+    const keys = Array.from(pickConnected(comp, want));
+    for (const k of keys) remaining.delete(k);
+    return keys.map((k) => k.split(",").map(Number));
   }
   function genRound(lvl) {
+    const count = Math.min(3 + Math.ceil(lvl / 2), 10);
+    const maxSize = lvl < 3 ? 4 : lvl < 6 ? 5 : 6;
+    const sizes = [];
+    let total = 0;
+    for (let i = 0; i < count; i++) {
+      const s = 3 + (Math.random() * (maxSize - 2) | 0);
+      sizes.push(s);
+      total += s;
+    }
+    while (total > 70) {
+      const i = sizes.findIndex((s) => s > 3);
+      if (i < 0) break;
+      sizes[i]--;
+      total--;
+    }
+    const all = /* @__PURE__ */ new Set();
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) all.add(x + "," + y);
+    const blob = pickConnected(all, total);
     const target = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
+    for (const k of blob) {
+      const [x, y] = k.split(",").map(Number);
+      target[y][x] = true;
+    }
+    const remaining = new Set(blob);
     const pieces = [];
-    const count = Math.min(2 + lvl, 8);
-    let guard = 0;
-    while (pieces.length < count && guard++ < 800) {
-      const size = lvl >= 3 && Math.random() < 0.35 ? 5 : Math.random() < 0.5 ? 4 : 3;
-      let p = makePiece(randomShapeCells(size), pieces.length, PALETTE[pieces.length % PALETTE.length]);
+    let sizeIdx = 0;
+    while (remaining.size > 0) {
+      const s = sizeIdx < sizes.length ? sizes[sizeIdx++] : Math.min(6, Math.max(3, remaining.size));
+      let p = makePiece(carvePiece(remaining, s), pieces.length, PALETTE[pieces.length % PALETTE.length]);
       const rots = Math.random() * 4 | 0;
       for (let i = 0; i < rots; i++) p = rotatePiece(p);
-      const px = Math.floor(Math.random() * (COLS - p.w + 1));
-      const py = Math.floor(Math.random() * (ROWS - p.h + 1));
-      let ok = true;
-      for (const [x, y] of p.cells) if (target[py + y][px + x]) {
-        ok = false;
-        break;
-      }
-      if (!ok) continue;
-      for (const [x, y] of p.cells) target[py + y][px + x] = true;
       pieces.push(p);
     }
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -163,6 +219,8 @@
     scoreEl.textContent = String(score);
     bestEl.textContent = String(best);
     starsEl.textContent = `${totalStars} \u2605`;
+    relicsEl.textContent = String(relics);
+    streakEl.textContent = String(streak);
   }
   function place() {
     if (!current || current.placed || !round || state !== "playing") return;
@@ -171,11 +229,16 @@
       beep(120, 0.08, "sawtooth", 0.04);
       return;
     }
-    for (const [x, y] of current.cells) board[a.py + y][a.px + x] = current.hue;
+    for (const [x, y] of current.cells) {
+      board[a.py + y][a.px + x] = current.hue;
+      spawnParticles(a.px + x, a.py + y, current.hue);
+    }
     current.placed = true;
     placedStack.push({ p: current, px: a.px, py: a.py });
     round.moves++;
-    beep(520, 0.06, "square", 0.05);
+    const left = round.pieces.filter((p) => !p.placed).length;
+    beep(520 + (round.pieces.length - left) * 60, 0.06, "square", 0.05);
+    if (left > 0) spawnText(`${left} TO GO`, SIZE / 2, SIZE / 2 - 40, "#35f0d0");
     current = round.pieces.find((p) => !p.placed) ?? null;
     renderTray();
     updateHud();
@@ -197,7 +260,10 @@
   }
   function rotate() {
     if (state !== "playing" || !current || current.placed) return;
-    current = rotatePiece(current);
+    const r = rotatePiece(current);
+    current.cells = r.cells;
+    current.w = r.w;
+    current.h = r.h;
     beep(440, 0.04, "square", 0.04);
   }
   function completeRound() {
@@ -206,9 +272,13 @@
     const timeSec = (performance.now() - round.startedAt) / 1e3;
     const n = round.pieces.length;
     const stars = round.moves <= n ? 3 : round.moves <= n + 2 ? 2 : 1;
-    const pts = 100 * level + stars * 50 + Math.max(0, Math.floor(60 - timeSec)) * 2;
+    streak = stars === 3 ? streak + 1 : 0;
+    const streakBonus = stars === 3 ? streak * 25 : 0;
+    const pts = 100 * level + stars * 50 + Math.max(0, Math.floor(60 - timeSec)) * 2 + streakBonus;
     score += pts;
     totalStars += stars;
+    relics++;
+    localStorage.setItem("rfp_tessera_relics", String(relics));
     if (score > best) {
       best = score;
       localStorage.setItem("rfp_tessera_best", String(best));
@@ -219,7 +289,7 @@
     spawnText(`+${pts}`, SIZE / 2, SIZE / 2, "#ffb347");
     chord([523, 659, 784, 1046], 0.3, "triangle", 0.06);
     bannerTitle.textContent = "RELIC COMPLETE " + "\u2605".repeat(stars) + "\u2606".repeat(3 - stars);
-    bannerStats.textContent = `round ${level} \xB7 ${round.moves} moves \xB7 ${timeSec.toFixed(1)}s \xB7 +${pts} pts \xB7 score ${score}`;
+    bannerStats.textContent = `round ${level} \xB7 ${round.moves} moves \xB7 ${timeSec.toFixed(1)}s \xB7 +${pts} pts${streakBonus ? ` (streak x${streak} +${streakBonus})` : ""} \xB7 score ${score}`;
     bannerEl.classList.remove("hidden");
     updateHud();
   }
@@ -233,6 +303,7 @@
     score = 0;
     totalStars = 0;
     level = 1;
+    streak = 0;
     state = "playing";
     introEl.classList.add("hidden");
     genRound(level);
@@ -278,7 +349,8 @@
   function renderTray() {
     if (!round) return;
     trayEl.innerHTML = "";
-    for (const p of round.pieces) {
+    const ordered = [...round.pieces.filter((p) => !p.placed), ...round.pieces.filter((p) => p.placed)];
+    for (const p of ordered) {
       const c = document.createElement("canvas");
       c.width = 72;
       c.height = 72;
