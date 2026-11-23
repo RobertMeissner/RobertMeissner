@@ -16,7 +16,7 @@ interface GateWall { group: any; z: number; gates: GateInfo[]; resolved: boolean
 interface Pack {
   group: any; z: number; lane: number; count: number; maxCount: number;
   own: number; r: number; ranged: boolean; cd: number; label: any; balls: any[];
-  type: "zergling" | "hydralisk" | "ultralisk"; dead: boolean;
+  type: "skitter" | "spitter" | "behemoth"; dead: boolean;
 }
 interface TargetT { group: any; z: number; lane: number; dead: boolean; }
 interface GunCrate { group: any; z: number; lane: number; taken: boolean; }
@@ -284,30 +284,30 @@ function spawnGateWall(z: number): void {
   S.walls.push({ group, z, gates, resolved: false });
 }
 
-function spawnPack(z: number, lane: number, count: number, type: "zergling" | "hydralisk" | "ultralisk"): Pack {
+function spawnPack(z: number, lane: number, count: number, type: "skitter" | "spitter" | "behemoth"): Pack {
   const group = new THREE.Group();
   group.position.set(LANES[lane], 0, z);
   scene.add(group);
-  const color = type === "zergling" ? 0xff5040 : type === "hydralisk" ? 0x6fe86a : 0xc07aff;
-  const r = type === "ultralisk" ? 1.1 : type === "hydralisk" ? 0.42 : 0.36;
+  const color = type === "skitter" ? 0xff5040 : type === "spitter" ? 0x6fe86a : 0xc07aff;
+  const r = type === "behemoth" ? 1.1 : type === "spitter" ? 0.42 : 0.36;
   const n = Math.min(14, Math.max(4, Math.round(count / 3)));
   const balls: any[] = [];
   for (let i = 0; i < n; i++) {
     const b = ball(r, color);
     const a = Math.random() * Math.PI * 2;
-    const rr = Math.random() * (type === "ultralisk" ? 2.2 : 0.9);
-    b.position.set(Math.cos(a) * rr, r + Math.random() * (type === "ultralisk" ? 2.2 : 0.8), Math.sin(a) * rr * 0.6);
+    const rr = Math.random() * (type === "behemoth" ? 2.2 : 0.9);
+    b.position.set(Math.cos(a) * rr, r + Math.random() * (type === "behemoth" ? 2.2 : 0.8), Math.sin(a) * rr * 0.6);
     group.add(b);
     balls.push(b);
   }
   const label = makeLabel(String(count), "#ff5f6e");
-  label.position.y = type === "ultralisk" ? 5.2 : 2.4;
+  label.position.y = type === "behemoth" ? 5.2 : 2.4;
   group.add(label);
   const pack: Pack = {
     group, z, lane, count, maxCount: count,
-    own: type === "zergling" ? 3.5 : type === "ultralisk" ? 0.6 : 0,
-    r: type === "ultralisk" ? 2.4 : 1.2,
-    ranged: type !== "zergling",
+    own: type === "skitter" ? 3.5 : type === "behemoth" ? 0.6 : 0,
+    r: type === "behemoth" ? 2.4 : 1.2,
+    ranged: type !== "skitter",
     cd: 1 + Math.random(), label, balls, type, dead: false,
   };
   S.packs.push(pack);
@@ -317,7 +317,7 @@ function spawnPack(z: number, lane: number, count: number, type: "zergling" | "h
 function updatePackVisual(p: Pack): void {
   const n = Math.max(0, Math.ceil((p.count / p.maxCount) * p.balls.length));
   for (let i = 0; i < p.balls.length; i++) p.balls[i].visible = i < n;
-  const col = p.type === "zergling" ? "#ff7a6a" : p.type === "hydralisk" ? "#8affa0" : "#d9b3ff";
+  const col = p.type === "skitter" ? "#ff7a6a" : p.type === "spitter" ? "#8affa0" : "#d9b3ff";
   setLabel(p.label, fmt(Math.max(0, p.count)), col);
 }
 
@@ -375,11 +375,11 @@ function spawnSection(z: number): void {
   for (let lane = 0; lane < 3; lane++) {
     const role = roles[lane];
     if (role === "enemy") {
-      const type: "zergling" | "hydralisk" = Math.random() < 0.65 ? "zergling" : "hydralisk";
+      const type: "skitter" | "spitter" = Math.random() < 0.65 ? "skitter" : "spitter";
       const count = 8 + Math.floor(Math.random() * 14) + S.level * 4;
       spawnPack(z, lane, count, type);
       if (Math.random() < 0.5) {
-        spawnPack(z - 16, lane, Math.max(4, Math.floor(count * 0.5)), Math.random() < 0.5 ? "zergling" : "hydralisk");
+        spawnPack(z - 16, lane, Math.max(4, Math.floor(count * 0.5)), Math.random() < 0.5 ? "skitter" : "spitter");
       }
     } else if (role === "targets") {
       spawnTargets(z, lane);
@@ -392,11 +392,11 @@ function spawnSection(z: number): void {
 
 function spawnBoss(): void {
   const count = 60 + 30 * S.level;
-  const boss = spawnPack(-70, 1, count, "ultralisk");
+  const boss = spawnPack(-70, 1, count, "behemoth");
   boss.cd = 1.0;
   S.boss = boss;
-  banner("⚠ ULTRALISK INBOUND ⚠");
-  toast("ULTRALISK — blast it down before it reaches you!");
+  banner("⚠ BEHEMOTH INBOUND ⚠");
+  toast("BEHEMOTH — blast it down before it reaches you!");
   chord([196, 147], 0.5);
 }
 
@@ -409,7 +409,7 @@ function killPack(p: Pack): void {
     S.speed = Math.min(26, S.speed + 1.6);
     S.count += 25;
     S.spawnCursor = 20;
-    banner("LEVEL " + S.level + " — ULTRALISK DOWN! +25");
+    banner("LEVEL " + S.level + " — BEHEMOTH DOWN! +25");
     toast("LEVEL UP! speed increased");
     chord([523, 659, 784], 0.3);
   }
@@ -424,7 +424,7 @@ function fireBullet(): void {
 }
 
 function fireSpine(p: Pack): void {
-  const x = p.type === "ultralisk" ? S.laneX + (Math.random() - 0.5) * 0.6 : LANES[p.lane] + (Math.random() - 0.5) * 0.8;
+  const x = p.type === "behemoth" ? S.laneX + (Math.random() - 0.5) * 0.6 : LANES[p.lane] + (Math.random() - 0.5) * 0.8;
   const y = 0.6 + Math.random() * 0.8;
   const mesh = ball(0.16, 0xff6fb5);
   mesh.position.set(x, y, p.z);
@@ -575,20 +575,20 @@ function update(dt: number): void {
       continue;
     }
     p.z += (S.speed + p.own) * dt;
-    if (p.type === "ultralisk") p.z = Math.min(p.z, PLAYER_Z - 0.5);
+    if (p.type === "behemoth") p.z = Math.min(p.z, PLAYER_Z - 0.5);
     p.group.position.z = p.z;
     p.group.position.x = LANES[p.lane] + Math.sin(S.time * 3 + p.z) * 0.15;
     if (p.ranged) {
       p.cd -= dt;
       if (p.cd <= 0 && p.z < -8) {
-        p.cd = p.type === "ultralisk" ? 0.9 : 1.5;
-        const n = p.type === "ultralisk" ? 3 : 1;
+        p.cd = p.type === "behemoth" ? 0.9 : 1.5;
+        const n = p.type === "behemoth" ? 3 : 1;
         for (let k = 0; k < n; k++) fireSpine(p);
       }
     }
     if (p.z >= PLAYER_Z - 0.5 && Math.abs(LANES[p.lane] - S.laneX) < 0.9) {
-      if (p.type === "ultralisk") {
-        gameOver("The Ultralisk crushed your squad of " + fmt(S.count) + ".");
+      if (p.type === "behemoth") {
+        gameOver("The behemoth crushed your squad of " + fmt(S.count) + ".");
         return;
       }
       if (S.count > p.count) {
@@ -599,7 +599,7 @@ function update(dt: number): void {
         S.shake = Math.max(S.shake, 0.4);
         killPack(p);
       } else {
-        gameOver("Your squad of " + fmt(S.count) + " charged into a zerg pack of " + fmt(p.count) + " — the swarm wins.");
+        gameOver("Your squad of " + fmt(S.count) + " charged into a swarm pack of " + fmt(p.count) + " — the swarm wins.");
         return;
       }
     }
@@ -701,7 +701,7 @@ function update(dt: number): void {
         S.count -= 1;
         S.shake = Math.max(S.shake, 0.15);
         if (S.count <= 0) {
-          gameOver("Peppered by hydralisk spines.");
+          gameOver("Peppered by spitter spines.");
           return;
         }
       }
