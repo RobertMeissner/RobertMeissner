@@ -18,7 +18,7 @@ Front matter: `draft: true` keeps a note unpublished; `title`, `date`, `tags` ar
 
 In this repo: **Settings → Pages → Build and deployment → Source → GitHub Actions** (instead of "Deploy from a branch"). The `pages.yml` workflow then owns publishing: the uploaded artifact is `docs/` (hub) plus the Quartz build output under `/blog/`.
 
-RSS feed is emitted as `index.xml` → served at `https://robertmeissner.github.io/RobertMeissner/blog/index.xml`. Point `.github/workflows/blog-post-workflow.yml` at it once the WordPress blog is retired.
+RSS feed is emitted as `index.xml` → served at `https://robertmeissner.github.io/RobertMeissner/blog/index.xml`. `.github/workflows/blog-post-workflow.yml` reads this feed to fill the README post list.
 
 ## Local preview
 

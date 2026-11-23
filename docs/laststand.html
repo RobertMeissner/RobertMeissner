@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last Stand — Terran wave defense</title>
+  <link rel="stylesheet" href="css/laststand.css" />
+</head>
+<body class="laststand">
+  <noscript>
+    <div class="noscript-info">&#9888; JavaScript is disabled &mdash; this page needs JavaScript to run. Please enable it in your browser settings.</div>
+  </noscript>
+
+  <header class="ls-header">
+    <a class="ls-back" href="index.html">&#9664; INDEX</a>
+    <h1>&#9876;&#65039; LAST STAND <span>// TERRAN</span></h1>
+    <p class="ls-sub">hold the Command Center against the zerg swarm &mdash; a starcraft-inspired wave defense</p>
+  </header>
+
+  <main class="ls-stage">
+    <section class="ls-scene">
+      <div class="ls-hud">
+        <div class="chip big"><span>MINERALS</span><b id="minerals">0</b></div>
+        <div class="chip"><span>WAVE</span><b id="wave">&mdash;</b></div>
+        <div class="chip cc-chip"><span>CC HULL</span><b id="ccHp">0</b><div class="cc-bar"><div id="ccFill"></div></div></div>
+        <div class="chip"><span>FOES</span><b id="foes">0</b></div>
+        <div class="chip"><span>KILLS</span><b id="kills">0</b></div>
+        <div class="chip"><span>BEST</span><b id="best">0</b></div>
+        <div class="chip"><span>STIM [SPC]</span><b id="stim">READY</b></div>
+        <div class="chip"><span>NADE [Q]</span><b id="nade">READY</b></div>
+      </div>
+      <div class="ls-canvas-wrap">
+        <canvas id="scene" width="960" height="540"></canvas>
+        <div id="overlay" class="ls-overlay">
+          <h2 id="ovTitle">LAST STAND // TERRAN</h2>
+          <p id="ovText">The zerg swarm is inbound. SCVs mine minerals automatically &mdash; spend them on turrets, bunkers and siege tanks, and fight alongside your marine. Survive as many waves as you can. Ultralisks hit every 5th wave.</p>
+          <button id="ovBtn" type="button">&#9654; START DEFENSE</button>
+        </div>
+      </div>
+      <div class="ls-controls">
+        <button id="pauseBtn" type="button">&#9208;&#65039; PAUSE (P)</button>
+        <button id="restartBtn" type="button">&#8635; RESTART</button>
+      </div>
+    </section>
+
+    <aside class="ls-side">
+      <h2>BUILD</h2>
+      <div id="buildList"></div>
+
+      <h2>UPGRADES</h2>
+      <div id="upgradeList"></div>
+
+      <h2>FIELD MANUAL</h2>
+      <p class="ls-note">left-click: move marine / place structure &middot; right-click: cancel / move</p>
+      <p class="ls-note">1-3: build &middot; 5-0: upgrades &middot; WASD / arrows: move marine</p>
+      <p class="ls-note">SPACE: stim pack &middot; Q: frag grenade at cursor &middot; P: pause &middot; ESC: cancel</p>
+      <p class="ls-note">structures block the swarm &mdash; walls are your best friend. siege tanks can't hit flyers. desktop recommended.</p>
+    </aside>
+  </main>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/laststand.js"></script>
+</body>
+</html>
