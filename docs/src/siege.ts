@@ -8,8 +8,10 @@ const H = canvas.height;
 const COLS = 16;
 const ROWS = 9;
 const TILE = 60;
-const SAVE_KEY = "rfp_gaterush_best_v1";
-const BASE_MAX = 200;
+const SAVE_KEY = "rfp_siege_best_v1";
+const CC_HP = 300;
+const CAP_BASE = 400;
+const CAP_DEPOT = 250;
 
 interface Vec { x: number; y: number; }
 interface Tile { x: number; y: number; }
@@ -22,13 +24,17 @@ const barrelCenter = (b: Barrel): Vec => center({ x: b.tx, y: b.ty });
 const CC_TILES = new Set(["7,3", "8,3", "7,4", "8,4"]);
 const CC_POS: Vec = { x: W / 2, y: H / 2 - 30 };
 
-type GateOp = "+" | "-" | "×" | "÷";
-
-interface EdgeGate { tile: Tile; op: GateOp; val: number; }
-
 const GATE_TILES: Tile[] = [
   { x: 8, y: 0 }, { x: 8, y: 8 }, { x: 0, y: 4 }, { x: 15, y: 4 },
 ];
+const MINERAL_TILES: Tile[] = [
+  { x: 2, y: 0 }, { x: 13, y: 0 }, { x: 2, y: 8 }, { x: 13, y: 8 },
+];
+const MINERAL_TILE_SET = new Set(MINERAL_TILES.map(tkey));
+
+type GateOp = "+" | "-" | "×" | "÷";
+
+interface EdgeGate { tile: Tile; op: GateOp; val: number; }
 
 function rollGate(): EdgeGate {
   const tile = GATE_TILES[Math.floor(Math.random() * GATE_TILES.length)];
@@ -49,20 +55,32 @@ function applyOp(count: number, op: GateOp, val: number): number {
   return Math.floor(count / val);
 }
 
-type BuildType = "wall" | "turret" | "cannon";
+type BuildType = "wall" | "turret" | "bunker" | "depot" | "refinery" | "lab";
 type StructType = "cc" | BuildType;
 
 interface BuildDef {
-  id: BuildType; name: string; icon: string; cost: number; desc: string; key: string;
+  id: BuildType; name: string; icon: string; costM: number; costG: number; time: number;
   hp: number; range: number; dmg: number; rate: number; aoe: number;
+  desc: string; key: string;
 }
 
 const BUILDS: BuildDef[] = [
-  { id: "wall",   name: "Wall",          icon: "🧱", cost: 10, desc: "cheap blockade, tanks hits", key: "1", hp: 500, range: 0,   dmg: 0, rate: 0,   aoe: 0  },
-  { id: "turret", name: "Laser Turret",  icon: "🔫", cost: 30, desc: "rapid shots at packs",       key: "2", hp: 150, range: 150, dmg: 2, rate: 2.0, aoe: 0  },
-  { id: "cannon", name: "Plasma Cannon", icon: "💥", cost: 80, desc: "splash shells",              key: "3", hp: 250, range: 170, dmg: 9, rate: 0.7, aoe: 46 },
+  { id: "wall",     name: "Wall",           icon: "🧱", costM: 15,  costG: 0,  time: 4,  hp: 700, range: 0,   dmg: 0, rate: 0,    aoe: 0,  desc: "reinforce the perimeter",   key: "1" },
+  { id: "turret",   name: "Missile Turret", icon: "🔫", costM: 50,  costG: 0,  time: 8,  hp: 220, range: 150, dmg: 3, rate: 2.0,  aoe: 0,  desc: "rapid fire at the horde",    key: "2" },
+  { id: "bunker",   name: "Bunker",         icon: "🛡️", costM: 90,  costG: 15, time: 12, hp: 900, range: 125, dmg: 8, rate: 1.2,  aoe: 40, desc: "armored strongpoint, splash", key: "3" },
+  { id: "depot",    name: "Supply Depot",   icon: "📦", costM: 30,  costG: 0,  time: 6,  hp: 150, range: 0,   dmg: 0, rate: 0,    aoe: 0,  desc: `+${CAP_DEPOT} resource storage`, key: "4" },
+  { id: "refinery", name: "Refinery",       icon: "⛽", costM: 70,  costG: 0,  time: 10, hp: 200, range: 0,   dmg: 0, rate: 0,    aoe: 0,  desc: "+4 gas/s",                   key: "5" },
+  { id: "lab",      name: "Lab",            icon: "🔬", costM: 120, costG: 20, time: 15, hp: 250, range: 0,   dmg: 0, rate: 0,    aoe: 0,  desc: "unlocks research",           key: "6" },
 ];
 const MAX_LVL = 4;
+
+interface ResearchDef { id: string; name: string; icon: string; desc: string; key: string; baseM: number; baseG: number; time: number; max: number; }
+
+const RESEARCHES: ResearchDef[] = [
+  { id: "weapons", name: "Weapons Bay",   icon: "⚔️", desc: "+35% turret/bunker damage per level", key: "Q", baseM: 80,  baseG: 10, time: 20, max: 5 },
+  { id: "armor",   name: "Armor Plating", icon: "🔩", desc: "+30% structure hull per level",       key: "W", baseM: 80,  baseG: 10, time: 20, max: 5 },
+  { id: "drills",  name: "Mining Drills", icon: "⛏️", desc: "+3 minerals/s per level",             key: "E", baseM: 60,  baseG: 0,  time: 15, max: 5 },
+];
 
 type PackType = "normal" | "runner" | "tank" | "boss";
 
@@ -75,7 +93,10 @@ const PACKS: Record<PackType, PackDef> = {
   boss:   { speed: 23, countMul: 1,   radius: 25, color: "#e0447c" },
 };
 
-interface Struct { type: StructType; tx: number; ty: number; hp: number; maxHp: number; lvl: number; cd: number; angle: number; spent: number; }
+interface Struct {
+  type: StructType; tx: number; ty: number; hp: number; lvl: number; cd: number; angle: number;
+  spentM: number; spentG: number; constructing: boolean; buildT: number; buildMax: number;
+}
 interface Pack {
   type: PackType; x: number; y: number; count: number; speed: number;
   r: number; color: string; flash: number; wob: number;
@@ -89,17 +110,22 @@ interface Proj {
 }
 interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; color: string; grav: number; }
 interface FloatT { x: number; y: number; txt: string; life: number; color: string; size: number; }
+interface Hero { x: number; y: number; hp: number; alive: boolean; respawnT: number; atkCd: number; angle: number; }
 
 interface State {
-  gold: number; earned: number; wave: number; phase: "prep" | "fight" | "over";
-  phaseT: number; queue: PackType[]; spawnT: number;
+  minerals: number; gas: number;
+  siege: number; phase: "build" | "siege" | "over";
+  siegeT: number; queue: PackType[]; spawnT: number;
   gates: EdgeGate[];
   structs: Struct[]; packs: Pack[]; barrels: Barrel[]; projs: Proj[];
   parts: Particle[]; floats: FloatT[];
-  kills: number;
+  kills: number; scrap: number; gunLvl: number;
+  up: Record<string, number>;
+  research: { id: string; t: number; max: number } | null;
   placing: BuildType | null; selected: Struct | null;
   mouse: Vec; mouseTile: Tile; keys: Record<string, boolean>; shotCd: number;
   barrelT: number;
+  hero: Hero;
   shake: number; banner: string; bannerT: number;
   paused: boolean; started: boolean; time: number; hudT: number;
 }
@@ -118,28 +144,40 @@ function fmt(n: number): string {
 const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
 const cc = (): Struct => S.structs[0];
 const buildDef = (s: Struct): BuildDef => BUILDS.find((b) => b.id === s.type) as BuildDef;
-const structDmg = (s: Struct): number => buildDef(s).dmg * Math.pow(1.6, s.lvl - 1);
-const structRange = (s: Struct): number => buildDef(s).range + 12 * (s.lvl - 1);
-const structRate = (s: Struct): number => buildDef(s).rate * (1 + 0.12 * (s.lvl - 1));
-const structMaxHp = (s: Struct): number => Math.round(buildDef(s).hp * Math.pow(1.5, s.lvl - 1));
-const upgradeCost = (s: Struct): number => Math.round(buildDef(s).cost * 0.9 * s.lvl);
+const gunMul = (): number => Math.pow(1.25, S.gunLvl);
+const cap = (): number => CAP_BASE + CAP_DEPOT * S.structs.filter((s) => s.type === "depot" && !s.constructing).length;
+const mineralRate = (): number => 2 * MINERAL_TILES.length + 3 * S.up.drills;
+const gasRate = (): number => 4 * S.structs.filter((s) => s.type === "refinery" && !s.constructing).length;
+const maxHpOf = (s: Struct): number => s.type === "cc" ? CC_HP : Math.round(buildDef(s).hp * Math.pow(1.4, s.lvl - 1) * (1 + 0.3 * S.up.armor));
+const structDmg = (s: Struct): number => buildDef(s).dmg * Math.pow(1.5, s.lvl - 1) * (1 + 0.35 * S.up.weapons) * gunMul();
+const structRange = (s: Struct): number => buildDef(s).range + 10 * (s.lvl - 1);
+const structRate = (s: Struct): number => buildDef(s).rate * (1 + 0.1 * (s.lvl - 1));
+const upgradeCostM = (s: Struct): number => Math.round(buildDef(s).costM * 0.7 * s.lvl);
+const upgradeCostG = (s: Struct): number => Math.round(buildDef(s).costG * 0.7 * s.lvl);
+const researchCostM = (r: ResearchDef): number => Math.round(r.baseM * Math.pow(2, S.up[r.id]));
+const researchCostG = (r: ResearchDef): number => Math.round(r.baseG * Math.pow(2, S.up[r.id]));
+const researchTime = (r: ResearchDef): number => r.time + 5 * S.up[r.id];
+const labReady = (): boolean => S.structs.some((s) => s.type === "lab" && !s.constructing);
 const structAt = (t: Tile): Struct | null => S.structs.find((s) => s.tx === t.x && s.ty === t.y) ?? null;
 const barrelAt = (t: Tile): Barrel | null => S.barrels.find((b) => b.tx === t.x && b.ty === t.y) ?? null;
-const barrelGold = (): number => 10 + 2 * S.wave;
 const isGateTile = (t: Tile): boolean => S.gates.some((g) => g.tile.x === t.x && g.tile.y === t.y);
 
 function reset(): void {
   S = {
-    gold: 100, earned: 0, wave: 0, phase: "prep", phaseT: 12,
-    queue: [], spawnT: 0,
+    minerals: 250, gas: 30,
+    siege: 0, phase: "build",
+    siegeT: 45, queue: [], spawnT: 0,
     gates: GATE_TILES.map((tile) => ({ tile, op: "+", val: 10 })),
-    structs: [{ type: "cc", tx: 7, ty: 3, hp: BASE_MAX, maxHp: BASE_MAX, lvl: 1, cd: 0, angle: -Math.PI / 2, spent: 0 }],
+    structs: [{ type: "cc", tx: 7, ty: 3, hp: CC_HP, lvl: 1, cd: 0, angle: -Math.PI / 2, spentM: 0, spentG: 0, constructing: false, buildT: 0, buildMax: 0 }],
     packs: [], barrels: [], projs: [],
     parts: [], floats: [],
-    kills: 0,
+    kills: 0, scrap: 0, gunLvl: 0,
+    up: { weapons: 0, armor: 0, drills: 0 },
+    research: null,
     placing: null, selected: null,
     mouse: { x: W / 2, y: H / 2 }, mouseTile: { x: 5, y: 5 }, keys: {}, shotCd: 0,
-    barrelT: 3,
+    barrelT: 2,
+    hero: { x: CC_POS.x - 70, y: CC_POS.y + 24, hp: 200, alive: true, respawnT: 0, atkCd: 0, angle: -Math.PI / 2 },
     shake: 0, banner: "", bannerT: 0,
     paused: false, started: false, time: 0, hudT: 0,
   };
@@ -168,16 +206,16 @@ function toast(msg: string): void {
 
 function banner(txt: string): void {
   S.banner = txt;
-  S.bannerT = 2.2;
+  S.bannerT = 2.4;
 }
 
-function waveComp(w: number): PackType[] {
+function siegeComp(n: number): PackType[] {
   const q: PackType[] = [];
-  const add = (t: PackType, n: number): void => { for (let i = 0; i < n; i++) q.push(t); };
-  add("normal", 3 + w);
-  if (w >= 3) add("runner", Math.floor(w / 2));
-  if (w >= 5) add("tank", Math.floor(w / 3));
-  if (w % 5 === 0) add("boss", 1);
+  const add = (t: PackType, c: number): void => { for (let i = 0; i < c; i++) q.push(t); };
+  add("normal", 3 + 2 * n);
+  if (n >= 2) add("runner", n);
+  if (n >= 3) add("tank", Math.ceil(n / 2));
+  if (n % 3 === 0) add("boss", 1);
   for (let i = q.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     const tmp = q[i]; q[i] = q[j]; q[j] = tmp;
@@ -185,14 +223,28 @@ function waveComp(w: number): PackType[] {
   return q;
 }
 
-function startWave(w: number): void {
-  S.wave = w;
-  S.phase = "fight";
-  S.queue = waveComp(w);
+function startSiege(n: number): void {
+  S.siege = n;
+  S.phase = "siege";
+  S.queue = siegeComp(n);
   S.spawnT = 0.4;
   S.gates = GATE_TILES.map(() => rollGate());
-  if (w % 5 === 0) { banner(`⚠ WAVE ${w} — BOSS PACK ⚠`); beep(70, 0.8, "sawtooth", 0.1, -30); }
-  else { banner(`WAVE ${w}`); chord([440, 554, 659], 0.25, "triangle", 0.05); }
+  S.barrelT = 1;
+  if (n % 3 === 0) { banner(`⚠ SIEGE ${n} — BOSS INBOUND ⚠`); beep(70, 0.8, "sawtooth", 0.1, -30); }
+  else { banner(`⚔ SIEGE ${n} — HOLD THE SHELTER ⚔`); beep(220, 0.4, "sawtooth", 0.08, -80); chord([330, 415, 494], 0.3, "triangle", 0.05); }
+}
+
+function endSiege(): void {
+  const m = 30 + 10 * S.siege;
+  const g = 8 + 3 * S.siege;
+  S.minerals = Math.min(cap(), S.minerals + m);
+  S.gas = Math.min(cap(), S.gas + g);
+  S.scrap += 2;
+  toast(`Siege ${S.siege} repelled! +${m} ◆ +${g} ⛁ +2 scrap`);
+  chord([523, 659, 784], 0.25, "triangle", 0.05);
+  banner(`SIEGE ${S.siege} REPELLED`);
+  S.phase = "build";
+  S.siegeT = 70;
 }
 
 function spawnPack(type: PackType): void {
@@ -204,16 +256,16 @@ function spawnPack(type: PackType): void {
   else if (gate.tile.x === COLS - 1) x = W + 14;
   else if (gate.tile.y === 0) y = -14;
   else y = H + 14;
-  const base = type === "boss" ? 40 + 20 * S.wave : (6 + 2 * S.wave) * d.countMul * (0.85 + Math.random() * 0.3);
+  const base = type === "boss" ? 50 + 25 * S.siege : (8 + 3 * S.siege) * d.countMul * (0.85 + Math.random() * 0.3);
   const before = Math.round(base);
   const after = Math.max(0, applyOp(before, gate.op, gate.val));
   S.packs.push({
-    type, x, y, count: after, speed: d.speed * (1 + Math.min(0.25, 0.015 * S.wave)),
+    type, x, y, count: after, speed: d.speed * (1 + Math.min(0.25, 0.015 * S.siege)),
     r: d.radius, color: d.color, flash: 0, wob: Math.random() * 10,
     target: null, retargetT: Math.random() * 0.3, atkCd: 0, dead: false, arrived: false,
   });
   const good = after < before;
-  S.floats.push({ x: clamp(gp.x, 60, W - 60), y: clamp(gp.y, 40, H - 40), txt: `${gate.op}${gate.val}: ${before} → ${after}`, life: 1.3, color: good ? "#5df08a" : "#ff5f6e", size: 14 });
+  S.floats.push({ x: clamp(gp.x, 70, W - 70), y: clamp(gp.y, 40, H - 40), txt: `${gate.op}${gate.val}: ${before} → ${after}`, life: 1.3, color: good ? "#5df08a" : "#ff5f6e", size: 14 });
   beep(good ? 880 : 220, 0.12, "square", 0.04, good ? 200 : -100);
   if (after <= 0) {
     const p = S.packs[S.packs.length - 1];
@@ -237,10 +289,9 @@ function killPack(p: Pack): void {
   p.dead = true;
   p.count = 0;
   S.kills++;
-  S.gold += 2;
-  S.earned += 2;
   spark(p.x, p.y, p.color, p.type === "boss" ? 40 : 16, p.type === "boss" ? 170 : 110);
-  S.floats.push({ x: p.x, y: p.y - p.r - 8, txt: "+2 ◆", life: 0.9, color: "#ffd23c", size: 13 });
+  S.floats.push({ x: p.x, y: p.y - p.r - 8, txt: "+5 ◆", life: 0.9, color: "#ffd23c", size: 13 });
+  S.minerals = Math.min(cap(), S.minerals + 5);
   if (p.type === "boss") {
     S.shake = Math.max(S.shake, 14);
     banner("BOSS PACK DOWN");
@@ -272,34 +323,46 @@ function damageStruct(s: Struct, dmg: number): void {
   }
 }
 
-function breakBarrel(b: Barrel): void {
-  const g = barrelGold();
-  S.gold += g;
-  S.earned += g;
+function explodeBarrel(b: Barrel): void {
   const p = barrelCenter(b);
-  spark(p.x, p.y, "#ffd23c", 16, 110);
-  spark(p.x, p.y, "#c98a3d", 10, 80);
-  S.floats.push({ x: p.x, y: p.y - 18, txt: `+${g} ◆`, life: 1, color: "#ffd23c", size: 14 });
-  beep(1250, 0.06, "sine", 0.04, 200);
   S.barrels = S.barrels.filter((x) => x !== b);
+  S.scrap += 1;
+  S.minerals = Math.min(cap(), S.minerals + 5 + S.siege);
+  if (S.scrap >= 3) {
+    S.scrap -= 3;
+    S.gunLvl = Math.min(6, S.gunLvl + 1);
+    banner(`🔥 BIGGER GUN — Lv ${S.gunLvl}`);
+    chord([660, 880, 1100], 0.2, "square", 0.05);
+  }
+  for (const pk of S.packs) {
+    if (pk.dead || pk.arrived) continue;
+    const d = Math.hypot(pk.x - p.x, pk.y - p.y);
+    if (d < 75 + pk.r) damagePack(pk, 25 * gunMul() * (1 - (d / (75 + pk.r)) * 0.5));
+  }
+  spark(p.x, p.y, "#ffb14d", 22, 170);
+  spark(p.x, p.y, "#ff5f3c", 14, 120);
+  spark(p.x, p.y, "#ffd23c", 8, 90);
+  S.floats.push({ x: p.x, y: p.y - 20, txt: `+1 scrap · +${5 + S.siege} ◆`, life: 1, color: "#ffd23c", size: 13 });
+  S.shake = Math.max(S.shake, 7);
+  beep(120, 0.3, "sawtooth", 0.08, -70);
 }
 
 function spawnBarrel(): void {
   for (let tries = 0; tries < 60; tries++) {
     const t = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
-    if (CC_TILES.has(tkey(t)) || isGateTile(t)) continue;
+    if (CC_TILES.has(tkey(t)) || isGateTile(t) || MINERAL_TILE_SET.has(tkey(t))) continue;
     if (structAt(t) || barrelAt(t)) continue;
-    const hp = 4;
-    S.barrels.push({ tx: t.x, ty: t.y, hp, maxHp: hp, t: 22 });
+    const hp = 3;
+    S.barrels.push({ tx: t.x, ty: t.y, hp, maxHp: hp, t: 20 });
     const p = center(t);
-    spark(p.x, p.y, "#c98a3d", 8, 60);
+    spark(p.x, p.y, "#ff8c5a", 8, 60);
     return;
   }
 }
 
 function canPlaceTile(t: Tile): boolean {
   if (t.x < 0 || t.x >= COLS || t.y < 0 || t.y >= ROWS) return false;
-  if (CC_TILES.has(tkey(t)) || isGateTile(t)) return false;
+  if (CC_TILES.has(tkey(t)) || isGateTile(t) || MINERAL_TILE_SET.has(tkey(t))) return false;
   if (structAt(t) || barrelAt(t)) return false;
   return true;
 }
@@ -308,16 +371,20 @@ function tryPlace(t: Tile): void {
   if (!S.placing) return;
   const def = BUILDS.find((b) => b.id === S.placing);
   if (!def) return;
-  if (S.gold < def.cost || !canPlaceTile(t)) {
+  if (S.minerals < def.costM || S.gas < def.costG || !canPlaceTile(t)) {
     beep(140, 0.08, "sawtooth", 0.04);
     return;
   }
-  S.gold -= def.cost;
-  S.structs.push({ type: def.id, tx: t.x, ty: t.y, hp: def.hp, maxHp: def.hp, lvl: 1, cd: 0, angle: -Math.PI / 2, spent: def.cost });
+  S.minerals -= def.costM;
+  S.gas -= def.costG;
+  S.structs.push({
+    type: def.id, tx: t.x, ty: t.y, hp: def.hp, lvl: 1, cd: 0, angle: -Math.PI / 2,
+    spentM: def.costM, spentG: def.costG, constructing: true, buildT: def.time, buildMax: def.time,
+  });
   const p = center(t);
-  spark(p.x, p.y, "#ffd23c", 12, 80);
+  spark(p.x, p.y, "#ffd23c", 10, 70);
   beep(660, 0.08, "square", 0.05);
-  chord([440, 554], 0.12, "triangle", 0.04);
+  toast(`${def.icon} ${def.name} under construction (${def.time}s)`);
 }
 
 function selectPlacing(id: BuildType): void {
@@ -329,14 +396,17 @@ function selectPlacing(id: BuildType): void {
 
 function upgradeSelected(): void {
   const s = S.selected;
-  if (!s || s.type === "cc" || s.lvl >= MAX_LVL) return;
-  const cost = upgradeCost(s);
-  if (S.gold < cost) { beep(140, 0.08, "sawtooth", 0.04); return; }
-  S.gold -= cost;
-  s.spent += cost;
+  if (!s || s.type === "cc" || s.constructing || s.lvl >= MAX_LVL) return;
+  if (s.type !== "wall" && s.type !== "turret" && s.type !== "bunker") return;
+  const cm = upgradeCostM(s);
+  const cg = upgradeCostG(s);
+  if (S.minerals < cm || S.gas < cg) { beep(140, 0.08, "sawtooth", 0.04); return; }
+  S.minerals -= cm;
+  S.gas -= cg;
+  s.spentM += cm;
+  s.spentG += cg;
   s.lvl++;
-  s.maxHp = structMaxHp(s);
-  s.hp = Math.min(s.maxHp, Math.round(s.hp * 1.5));
+  s.hp = Math.min(maxHpOf(s), Math.round(s.hp * 1.4));
   const p = structCenter(s);
   spark(p.x, p.y, "#ffd23c", 16, 100);
   beep(660, 0.08, "square", 0.05);
@@ -348,14 +418,30 @@ function upgradeSelected(): void {
 function sellSelected(): void {
   const s = S.selected;
   if (!s || s.type === "cc") return;
-  const refund = Math.floor(s.spent * 0.6);
-  S.gold += refund;
+  S.minerals = Math.min(cap(), S.minerals + Math.floor(s.spentM * 0.6));
+  S.gas = Math.min(cap(), S.gas + Math.floor(s.spentG * 0.6));
   S.structs = S.structs.filter((x) => x !== s);
   S.selected = null;
   const p = structCenter(s);
   spark(p.x, p.y, "#ffd23c", 10, 80);
-  S.floats.push({ x: p.x, y: p.y - 16, txt: `+${refund} ◆`, life: 1, color: "#ffd23c", size: 13 });
   beep(500, 0.1, "square", 0.05, 150);
+  updateHud();
+}
+
+function buyResearch(id: string): void {
+  const r = RESEARCHES.find((x) => x.id === id);
+  if (!r) return;
+  if (!labReady()) { toast("🔬 Build a Lab first!"); beep(140, 0.08, "sawtooth", 0.04); return; }
+  if (S.research) { toast("Research already in progress"); return; }
+  if (S.up[id] >= r.max) { toast(`${r.name} already at max level`); return; }
+  const cm = researchCostM(r);
+  const cg = researchCostG(r);
+  if (S.minerals < cm || S.gas < cg) { beep(140, 0.08, "sawtooth", 0.04); return; }
+  S.minerals -= cm;
+  S.gas -= cg;
+  S.research = { id, t: researchTime(r), max: researchTime(r) };
+  toast(`🔬 Researching ${r.name} (${researchTime(r)}s)`);
+  beep(660, 0.1, "square", 0.05);
   updateHud();
 }
 
@@ -374,6 +460,41 @@ function pickTarget(p: Pack): Struct {
     if (d < bd) { bd = d; bestS = s; }
   }
   return bestS ?? c;
+}
+
+function updateHero(dt: number): void {
+  const h = S.hero;
+  if (!h.alive) {
+    h.respawnT -= dt;
+    if (h.respawnT <= 0) {
+      h.alive = true;
+      h.hp = 200;
+      banner("MARINE REDEPLOYED");
+      chord([660, 880], 0.15, "triangle", 0.05);
+    }
+    return;
+  }
+  h.hp = Math.min(200, h.hp + 6 * dt);
+  h.atkCd -= dt;
+  let t: Pack | null = null;
+  let bd = 200;
+  for (const pk of S.packs) {
+    if (pk.dead || pk.arrived) continue;
+    const d = Math.hypot(pk.x - h.x, pk.y - h.y) - pk.r;
+    if (d < bd) { bd = d; t = pk; }
+  }
+  if (t) {
+    h.angle = Math.atan2(t.y - h.y, t.x - h.x);
+    if (h.atkCd <= 0) {
+      h.atkCd = 0.3;
+      S.projs.push({
+        x: h.x + Math.cos(h.angle) * 16, y: h.y + Math.sin(h.angle) * 16,
+        vx: Math.cos(h.angle) * 620, vy: Math.sin(h.angle) * 620, speed: 620,
+        dmg: 6 * gunMul(), aoe: 0, targetP: t, targetB: null, tx: t.x, ty: t.y, life: 0.8, kind: "bolt",
+      });
+      beep(980 + Math.random() * 200, 0.03, "square", 0.02, -300);
+    }
+  }
 }
 
 function updatePacks(dt: number): void {
@@ -395,7 +516,7 @@ function updatePacks(dt: number): void {
       p.atkCd -= dt;
       if (p.atkCd <= 0) {
         p.atkCd = 0.8;
-        damageStruct(t, 6 + S.wave);
+        damageStruct(t, 6 + S.siege);
         beep(150, 0.05, "square", 0.03, -60);
         if (t.type === "cc" && cc().hp <= 0 && S.phase !== "over") gameOver();
       }
@@ -439,7 +560,19 @@ function fireProj(s: Struct, targetP: Pack | null, targetB: Barrel | null): void
 
 function updateStructs(dt: number): void {
   for (const s of S.structs) {
-    if (s.type === "cc" || s.type === "wall") continue;
+    if (s.constructing) {
+      s.buildT -= dt;
+      if (s.buildT <= 0) {
+        s.constructing = false;
+        const p = structCenter(s);
+        spark(p.x, p.y, "#5df08a", 14, 90);
+        toast(`✅ ${buildDef(s).name} complete!`);
+        chord([523, 784], 0.15, "triangle", 0.05);
+        updateHud();
+      }
+      continue;
+    }
+    if (s.type === "cc" || s.type === "wall" || s.type === "depot" || s.type === "refinery" || s.type === "lab") continue;
     const def = buildDef(s);
     const p = structPos(s);
     const range = structRange(s);
@@ -502,8 +635,8 @@ function updateProjs(dt: number): void {
         const b = barrelAt(t);
         if (b) {
           b.hp -= p.dmg;
-          spark(p.x, p.y, "#c98a3d", 4, 60);
-          if (b.hp <= 0) breakBarrel(b);
+          spark(p.x, p.y, "#ff8c5a", 4, 60);
+          if (b.hp <= 0) explodeBarrel(b);
         }
       }
       continue;
@@ -522,8 +655,8 @@ function updateProjs(dt: number): void {
       spark(p.x, p.y, "#7df9ff", 4, 60);
     } else if (p.targetB && Math.hypot(barrelCenter(p.targetB).x - p.x, barrelCenter(p.targetB).y - p.y) < 20) {
       p.targetB.hp -= p.dmg;
-      spark(p.x, p.y, "#c98a3d", 4, 60);
-      if (p.targetB.hp <= 0) breakBarrel(p.targetB);
+      spark(p.x, p.y, "#ff8c5a", 4, 60);
+      if (p.targetB.hp <= 0) explodeBarrel(p.targetB);
       p.life = 0;
     } else if (p.kind === "shell" && Math.hypot(p.tx - p.x, p.ty - p.y) < 8) {
       explodeShell(p);
@@ -533,10 +666,12 @@ function updateProjs(dt: number): void {
 }
 
 function updateBarrels(dt: number): void {
-  S.barrelT -= dt;
-  if (S.barrelT <= 0 && S.barrels.length < 4) {
-    spawnBarrel();
-    S.barrelT = 5 + Math.random() * 3;
+  if (S.phase === "siege") {
+    S.barrelT -= dt;
+    if (S.barrelT <= 0 && S.barrels.length < 5) {
+      spawnBarrel();
+      S.barrelT = 2.5 + Math.random() * 2;
+    }
   }
   for (const b of S.barrels) b.t -= dt;
   S.barrels = S.barrels.filter((b) => b.t > 0);
@@ -560,28 +695,37 @@ function updateParts(dt: number): void {
 function update(dt: number): void {
   S.time += dt;
   S.shotCd = Math.max(0, S.shotCd - dt);
-  if (S.phase === "prep") {
-    S.phaseT -= dt;
-    if (S.phaseT <= 0) startWave(S.wave + 1);
-  } else if (S.phase === "fight") {
+  S.minerals = Math.min(cap(), S.minerals + mineralRate() * dt);
+  S.gas = Math.min(cap(), S.gas + gasRate() * dt);
+  if (S.research) {
+    S.research.t -= dt;
+    if (S.research.t <= 0) {
+      const id = S.research.id;
+      S.up[id]++;
+      S.research = null;
+      const r = RESEARCHES.find((x) => x.id === id);
+      toast(`✅ Research complete: ${r?.name} Lv ${S.up[id]}`);
+      chord([523, 659, 784, 1046], 0.3, "triangle", 0.05);
+      for (const s of S.structs) s.hp = Math.min(maxHpOf(s), s.hp);
+      updateHud();
+    }
+  }
+  if (S.phase === "build") {
+    S.siegeT -= dt;
+    if (S.siegeT <= 0) startSiege(S.siege + 1);
+  } else if (S.phase === "siege") {
     if (S.queue.length > 0) {
       S.spawnT -= dt;
       if (S.spawnT <= 0) {
         const t = S.queue.shift();
         if (t) spawnPack(t);
-        S.spawnT = Math.max(0.35, 0.9 - S.wave * 0.04);
+        S.spawnT = Math.max(0.35, 0.9 - S.siege * 0.04);
       }
     } else if (S.packs.length === 0) {
-      const bonus = 12 + 3 * S.wave;
-      S.gold += bonus;
-      S.earned += bonus;
-      toast(`Wave ${S.wave} cleared! +${bonus} ◆`);
-      chord([523, 659, 784], 0.2, "triangle", 0.05);
-      S.phase = "prep";
-      S.phaseT = 9;
-      banner(`WAVE ${S.wave} CLEARED`);
+      endSiege();
     }
   }
+  updateHero(dt);
   updatePacks(dt);
   updateStructs(dt);
   updateProjs(dt);
@@ -595,13 +739,13 @@ function gameOver(): void {
   S.phase = "over";
   S.placing = null;
   S.selected = null;
-  best = Math.max(best, S.wave);
+  best = Math.max(best, S.siege);
   saveBest();
   S.shake = 20;
   beep(90, 1, "sawtooth", 0.1, -50);
   chord([330, 262, 196, 131], 0.6, "triangle", 0.06);
-  $("ovTitle").textContent = "💥 COMMAND CENTER OVERRUN";
-  $("ovText").textContent = `A zerg pack broke through on wave ${S.wave}. ${S.kills} packs destroyed · ${fmt(S.earned)} ◆ earned · best: wave ${best}.`;
+  $("ovTitle").textContent = "💥 SHELTER OVERRUN";
+  $("ovText").textContent = `The horde broke through on siege ${S.siege}. ${S.kills} zerg slain · gun Lv ${S.gunLvl} · best: siege ${best}.`;
   ($("ovBtn") as HTMLButtonElement).textContent = "↻ REDEPLOY";
   $("overlay").classList.remove("hidden");
 }
@@ -610,19 +754,22 @@ function startGame(): void {
   reset();
   S.started = true;
   $("overlay").classList.add("hidden");
-  banner("HOLD THE BASE");
+  banner("BUILD YOUR SHELTER — SIEGE INCOMING");
   chord([392, 523, 659], 0.3, "triangle", 0.06);
   updateHud();
 }
 
 function playerShoot(x: number, y: number): void {
   if (S.shotCd > 0 || S.phase === "over" || !S.started) return;
-  S.shotCd = 0.22;
-  const ang = Math.atan2(y - CC_POS.y, x - CC_POS.x);
+  S.shotCd = 0.2;
+  const h = S.hero;
+  const ox = h.alive ? h.x : CC_POS.x;
+  const oy = h.alive ? h.y : CC_POS.y;
+  const ang = Math.atan2(y - oy, x - ox);
   S.projs.push({
-    x: CC_POS.x + Math.cos(ang) * 40, y: CC_POS.y + Math.sin(ang) * 40,
-    vx: Math.cos(ang) * 700, vy: Math.sin(ang) * 700, speed: 700, dmg: 3, aoe: 0,
-    targetP: null, targetB: null, tx: x, ty: y, life: 0.35, kind: "shot",
+    x: ox + Math.cos(ang) * 18, y: oy + Math.sin(ang) * 18,
+    vx: Math.cos(ang) * 750, vy: Math.sin(ang) * 750, speed: 750, dmg: 5 * gunMul(), aoe: 0,
+    targetP: null, targetB: null, tx: x, ty: y, life: 0.4, kind: "shot",
   });
   beep(900 + Math.random() * 200, 0.03, "square", 0.025, -300);
 }
@@ -677,6 +824,8 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "KeyP") { S.paused = !S.paused; return; }
   if (e.code === "KeyU") { upgradeSelected(); return; }
   if (e.code === "KeyX") { sellSelected(); return; }
+  const r = RESEARCHES.find((x) => `Key${x.key}` === e.code);
+  if (r) { buyResearch(r.id); return; }
   const b = BUILDS.find((x) => `Digit${x.key}` === e.code);
   if (b) selectPlacing(b.id);
 });
@@ -689,7 +838,8 @@ $("upBtn").addEventListener("click", () => upgradeSelected());
 $("sellBtn").addEventListener("click", () => sellSelected());
 window.addEventListener("beforeunload", saveBest);
 
-const buildRefs: { def: BuildDef; btn: HTMLButtonElement; costEl: HTMLElement; countEl: HTMLElement }[] = [];
+const buildRefs: { def: BuildDef; btn: HTMLButtonElement; costEl: HTMLElement; extraEl: HTMLElement }[] = [];
+const researchRefs: { def: ResearchDef; btn: HTMLButtonElement; costEl: HTMLElement; lvlEl: HTMLElement }[] = [];
 
 function makeBtn(def: { name: string; icon: string; desc: string; key: string }): { btn: HTMLButtonElement; costEl: HTMLElement; extraEl: HTMLElement } {
   const btn = document.createElement("button");
@@ -725,6 +875,10 @@ function makeBtn(def: { name: string; icon: string; desc: string; key: string })
   return { btn, costEl: cost, extraEl: extra };
 }
 
+function costText(m: number, g: number): string {
+  return (m > 0 ? `${m} ◆` : "") + (m > 0 && g > 0 ? " + " : "") + (g > 0 ? `${g} ⛁` : "");
+}
+
 function renderLists(): void {
   const bl = $("buildList");
   bl.innerHTML = "";
@@ -732,50 +886,85 @@ function renderLists(): void {
     const r = makeBtn(def);
     r.btn.addEventListener("click", () => selectPlacing(def.id));
     bl.appendChild(r.btn);
-    buildRefs.push({ def, btn: r.btn, costEl: r.costEl, countEl: r.extraEl });
+    buildRefs.push({ def, btn: r.btn, costEl: r.costEl, extraEl: r.extraEl });
+  }
+  const rl = $("researchList");
+  rl.innerHTML = "";
+  for (const def of RESEARCHES) {
+    const r = makeBtn(def);
+    r.btn.addEventListener("click", () => buyResearch(def.id));
+    rl.appendChild(r.btn);
+    researchRefs.push({ def, btn: r.btn, costEl: r.costEl, lvlEl: r.extraEl });
   }
 }
 
 function updateHud(): void {
-  $("gold").textContent = fmt(S.gold);
-  $("wave").textContent = S.wave === 0 ? "—" : String(S.wave);
+  $("minerals").textContent = fmt(S.minerals);
+  $("gas").textContent = fmt(S.gas);
+  $("store").textContent = `${fmt(S.minerals)}/${cap()}`;
   const c = cc();
-  $("baseHp").textContent = `${Math.max(0, Math.ceil(c.hp))} / ${c.maxHp}`;
-  ($("baseFill") as HTMLDivElement).style.width = `${clamp((c.hp / c.maxHp) * 100, 0, 100)}%`;
-  $("foes").textContent = String(S.packs.length + S.queue.length);
+  $("baseHp").textContent = `${Math.max(0, Math.ceil(c.hp))} / ${CC_HP}`;
+  ($("baseFill") as HTMLDivElement).style.width = `${clamp((c.hp / CC_HP) * 100, 0, 100)}%`;
+  $("siege").textContent = S.phase === "siege" ? `⚔ ${S.siege}` : S.siege === 0 ? `in ${Math.ceil(S.siegeT)}s` : `${S.siege} · in ${Math.ceil(S.siegeT)}s`;
+  $("gun").textContent = `Lv ${S.gunLvl}`;
   $("kills").textContent = String(S.kills);
   $("best").textContent = String(best);
   for (const r of buildRefs) {
     const count = S.structs.filter((s) => s.type === r.def.id).length;
-    r.countEl.textContent = count > 0 ? `x${count}` : "";
-    r.costEl.textContent = `${r.def.cost} ◆`;
-    r.btn.disabled = S.gold < r.def.cost;
+    const building = S.structs.filter((s) => s.type === r.def.id && s.constructing).length;
+    r.extraEl.textContent = count > 0 ? `x${count}${building > 0 ? ` (+${building}…)` : ""}` : "";
+    r.costEl.textContent = `${costText(r.def.costM, r.def.costG)} · ${r.def.time}s`;
+    r.btn.disabled = S.minerals < r.def.costM || S.gas < r.def.costG;
   }
-  const panel = $("towerPanel");
+  for (const r of researchRefs) {
+    const lvl = S.up[r.def.id];
+    if (lvl >= r.def.max) {
+      r.lvlEl.textContent = "MAX";
+      r.costEl.textContent = "—";
+      r.btn.disabled = true;
+    } else {
+      r.lvlEl.textContent = `Lv ${lvl}/${r.def.max}`;
+      r.costEl.textContent = `${costText(researchCostM(r.def), researchCostG(r.def))} · ${researchTime(r.def)}s`;
+      r.btn.disabled = !labReady() || S.research !== null || S.minerals < researchCostM(r.def) || S.gas < researchCostG(r.def);
+    }
+  }
+  const rs = $("researchStatus");
+  if (S.research) {
+    const r = RESEARCHES.find((x) => x.id === S.research?.id);
+    rs.textContent = `🔬 researching ${r?.name ?? ""} — ${Math.ceil(S.research.t)}s left`;
+  } else if (labReady()) {
+    rs.textContent = "🔬 lab online — research unlocked (Q/W/E)";
+  } else {
+    rs.textContent = "🔬 build a Lab (6) to unlock research";
+  }
+  const panel = $("selPanel");
   const s = S.selected;
   if (s) {
     panel.classList.remove("hidden");
     if (s.type === "cc") {
-      $("tpName").textContent = "🏠 Command Center";
-      $("tpStats").textContent = `hull ${Math.max(0, Math.ceil(s.hp))} / ${s.maxHp}`;
+      $("tpName").textContent = "🏠 Command Center (your shelter)";
+      $("tpStats").textContent = `hull ${Math.max(0, Math.ceil(s.hp))} / ${CC_HP}`;
       ($("upBtn") as HTMLButtonElement).disabled = true;
-      ($("upBtn") as HTMLButtonElement).textContent = "⬆ (bunker is maxed)";
+      ($("upBtn") as HTMLButtonElement).textContent = "⬆ (shelter is maxed)";
       ($("sellBtn") as HTMLButtonElement).disabled = true;
       ($("sellBtn") as HTMLButtonElement).textContent = "SELL (nope)";
     } else {
       const def = buildDef(s);
-      $("tpName").textContent = `${def.icon} ${def.name} — Lv ${s.lvl}/${MAX_LVL}`;
-      $("tpStats").textContent = `hp ${Math.ceil(s.hp)}/${s.maxHp}` + (def.range > 0 ? ` · dmg ${structDmg(s).toFixed(1)} · range ${structRange(s).toFixed(0)}` : "");
+      $("tpName").textContent = `${def.icon} ${def.name} — Lv ${s.lvl}/${MAX_LVL}${s.constructing ? " (building…)" : ""}`;
+      $("tpStats").textContent = `hp ${Math.ceil(s.hp)}/${maxHpOf(s)}` + (def.range > 0 ? ` · dmg ${structDmg(s).toFixed(1)} · range ${structRange(s).toFixed(0)}` : "");
       const up = $("upBtn") as HTMLButtonElement;
       const sell = $("sellBtn") as HTMLButtonElement;
-      if (s.lvl >= MAX_LVL) {
-        up.textContent = "⬆ MAX LEVEL";
+      if (s.constructing) {
         up.disabled = true;
+        up.textContent = `⬆ building… ${Math.ceil(s.buildT)}s`;
+      } else if (s.lvl >= MAX_LVL || (s.type !== "wall" && s.type !== "turret" && s.type !== "bunker")) {
+        up.disabled = true;
+        up.textContent = "⬆ MAX / N/A";
       } else {
-        up.textContent = `⬆ UPGRADE — ${upgradeCost(s)} ◆ (U)`;
-        up.disabled = S.gold < upgradeCost(s);
+        up.textContent = `⬆ UPGRADE — ${costText(upgradeCostM(s), upgradeCostG(s))} (U)`;
+        up.disabled = S.minerals < upgradeCostM(s) || S.gas < upgradeCostG(s);
       }
-      sell.textContent = `SELL +${Math.floor(s.spent * 0.6)} ◆ (X)`;
+      sell.textContent = `SELL +${Math.floor(s.spentM * 0.6)} ◆ (X)`;
       sell.disabled = false;
     }
   } else {
@@ -812,6 +1001,32 @@ function drawBg(): void {
   }
 }
 
+function drawMinerals(): void {
+  for (const t of MINERAL_TILES) {
+    const p = center(t);
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.shadowColor = "#35f0d0";
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = "#4dd8e8";
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * 14 - 4, 8);
+      ctx.lineTo(Math.cos(a) * 14, 8 - (10 + (i % 2) * 6));
+      ctx.lineTo(Math.cos(a) * 14 + 4, 8);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#9ff5ff";
+    ctx.font = "9px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("+2/s", 0, 24);
+    ctx.restore();
+  }
+}
+
 function drawGates(): void {
   for (const g of S.gates) {
     const p = center(g.tile);
@@ -837,11 +1052,6 @@ function drawGates(): void {
     ctx.textAlign = "center";
     ctx.fillText(`${g.op}${g.val}`, 0, 5);
     ctx.restore();
-    ctx.fillStyle = "#7d92ad";
-    ctx.font = "9px monospace";
-    ctx.textAlign = "center";
-    const off = g.tile.y === 0 ? 26 : g.tile.y === ROWS - 1 ? -26 : g.tile.x === 0 ? 0 : 0;
-    ctx.fillText("GATE", p.x, p.y + (g.tile.y === 0 ? 30 : g.tile.y === ROWS - 1 ? -30 : off + (g.tile.x === 0 ? -32 : 32)));
   }
 }
 
@@ -872,33 +1082,33 @@ function drawBase(): void {
   ctx.restore();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(p.x - 62, p.y - 82, 124, 6);
-  const ratio = clamp(cc().hp / cc().maxHp, 0, 1);
+  const ratio = clamp(cc().hp / CC_HP, 0, 1);
   ctx.fillStyle = ratio > 0.5 ? "#5df08a" : ratio > 0.25 ? "#ffd23c" : "#ff5347";
   ctx.fillRect(p.x - 62, p.y - 82, 124 * ratio, 6);
 }
 
 function drawBarrel(b: Barrel): void {
   const p = barrelCenter(b);
-  const pulse = 1 + 0.06 * Math.sin(S.time * 5 + b.tx);
+  const pulse = 1 + 0.07 * Math.sin(S.time * 6 + b.tx);
   ctx.save();
   ctx.translate(p.x, p.y);
   ctx.scale(pulse, pulse);
-  ctx.shadowColor = "#c98a3d";
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = "#8a5a24";
+  ctx.shadowColor = "#ff8c5a";
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = "#8a3d24";
   ctx.fillRect(-16, -16, 32, 32);
   ctx.shadowBlur = 0;
-  ctx.strokeStyle = "#c98a3d";
+  ctx.strokeStyle = "#ff8c5a";
   ctx.lineWidth = 3;
   ctx.strokeRect(-16, -16, 32, 32);
-  ctx.beginPath();
-  ctx.moveTo(-16, -16); ctx.lineTo(16, 16);
-  ctx.moveTo(16, -16); ctx.lineTo(-16, 16);
-  ctx.stroke();
+  ctx.fillStyle = "#ffd23c";
+  ctx.font = "bold 14px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("☢", 0, 5);
   ctx.restore();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(p.x - 14, p.y - 26, 28, 4);
-  ctx.fillStyle = "#ffd23c";
+  ctx.fillStyle = "#ff8c5a";
   ctx.fillRect(p.x - 14, p.y - 26, 28 * clamp(b.hp / b.maxHp, 0, 1), 4);
 }
 
@@ -925,6 +1135,22 @@ function drawStruct(s: Struct): void {
     }
     ctx.setLineDash([]);
   }
+  if (s.constructing) {
+    ctx.strokeStyle = "#ffd23c";
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-24, -24, 48, 48);
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255, 210, 60, 0.15)";
+    ctx.fillRect(-24, -24, 48, 48);
+    ctx.restore();
+    const prog = 1 - s.buildT / s.buildMax;
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(p.x - 22, p.y + 28, 44, 5);
+    ctx.fillStyle = "#ffd23c";
+    ctx.fillRect(p.x - 22, p.y + 28, 44 * clamp(prog, 0, 1), 5);
+    return;
+  }
   if (s.type === "wall") {
     ctx.fillStyle = "#6b5a4a";
     ctx.fillRect(-24, -24, 48, 48);
@@ -943,22 +1169,90 @@ function drawStruct(s: Struct): void {
     ctx.strokeStyle = "#8fa3b8"; ctx.lineWidth = 2; ctx.stroke();
     ctx.strokeStyle = "#7df9ff"; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(s.angle) * 24, Math.sin(s.angle) * 24); ctx.stroke();
+  } else if (s.type === "bunker") {
+    ctx.fillStyle = "#6b7a5a";
+    ctx.fillRect(-24, -18, 48, 36);
+    ctx.strokeStyle = "#93a37e"; ctx.lineWidth = 2;
+    ctx.strokeRect(-24, -18, 48, 36);
+    ctx.fillStyle = "#3c4634";
+    ctx.fillRect(-20, -6, 40, 12);
+    ctx.strokeStyle = "#ffb14d"; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(Math.cos(s.angle) * 26, Math.sin(s.angle) * 26); ctx.stroke();
+  } else if (s.type === "depot") {
+    ctx.fillStyle = "#5d4a2c";
+    ctx.fillRect(-20, -16, 40, 32);
+    ctx.strokeStyle = "#a08050"; ctx.lineWidth = 2;
+    ctx.strokeRect(-20, -16, 40, 32);
+    ctx.fillStyle = "#3d3220";
+    ctx.fillRect(-20, -4, 40, 8);
+  } else if (s.type === "refinery") {
+    ctx.fillStyle = "#3d4c63";
+    ctx.fillRect(-18, -20, 36, 40);
+    ctx.strokeStyle = "#8fa3b8"; ctx.lineWidth = 2;
+    ctx.strokeRect(-18, -20, 36, 40);
+    ctx.fillStyle = "#7dffb0";
+    ctx.shadowColor = "#7dffb0";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(0, -6, 7 + Math.sin(S.time * 5) * 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
   } else {
-    ctx.fillStyle = "#6b5a3d";
-    ctx.fillRect(-16, -13, 32, 26);
-    ctx.strokeStyle = "#a08a5f"; ctx.lineWidth = 2;
-    ctx.strokeRect(-16, -13, 32, 26);
-    ctx.strokeStyle = "#ffb14d"; ctx.lineWidth = 6;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(s.angle) * 28, Math.sin(s.angle) * 28); ctx.stroke();
+    ctx.fillStyle = "#4a3d6b";
+    ctx.fillRect(-20, -18, 40, 36);
+    ctx.strokeStyle = "#8a7ab0"; ctx.lineWidth = 2;
+    ctx.strokeRect(-20, -18, 40, 36);
+    ctx.fillStyle = "#c07bf2";
+    ctx.shadowColor = "#c07bf2";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(0, 0, 8 + Math.sin(S.time * 4) * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
   }
   ctx.restore();
   for (let i = 0; i < s.lvl; i++) {
     ctx.fillStyle = "#ffd23c";
     ctx.beginPath();
-    ctx.arc(p.x - (s.lvl - 1) * 4 + i * 8, p.y + 22, 2.5, 0, Math.PI * 2);
+    ctx.arc(p.x - (s.lvl - 1) * 4 + i * 8, p.y + 24, 2.5, 0, Math.PI * 2);
     ctx.fill();
   }
-  if (s.hp < s.maxHp) drawHpBar(p.x, p.y - 30, 44, s.hp / s.maxHp);
+  const mh = maxHpOf(s);
+  if (s.hp < mh) drawHpBar(p.x, p.y - 30, 44, s.hp / mh);
+}
+
+function drawHero(): void {
+  const h = S.hero;
+  if (!h.alive) {
+    ctx.fillStyle = "#ffd23c";
+    ctx.font = "bold 11px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`MARINE RESPAWN ${Math.ceil(h.respawnT)}s`, CC_POS.x - 70, CC_POS.y + 44);
+    return;
+  }
+  ctx.save();
+  ctx.translate(h.x, h.y);
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.beginPath();
+  ctx.ellipse(0, 10, 11, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#aebfd2";
+  ctx.beginPath();
+  ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#5f7290";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = "#35f0d0";
+  ctx.fillRect(Math.cos(h.angle) * 6 - 3, Math.sin(h.angle) * 6 - 2, 6, 4);
+  ctx.strokeStyle = "#2c3a4f";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(Math.cos(h.angle) * 8, Math.sin(h.angle) * 8);
+  ctx.lineTo(Math.cos(h.angle) * 19, Math.sin(h.angle) * 19);
+  ctx.stroke();
+  ctx.restore();
+  drawHpBar(h.x, h.y - 22, 26, h.hp / 200);
 }
 
 function drawPack(p: Pack): void {
@@ -1025,7 +1319,7 @@ function drawGhost(): void {
   if (S.placing) {
     const def = BUILDS.find((x) => x.id === S.placing);
     if (!def) return;
-    const ok = canPlaceTile(t) && S.gold >= def.cost;
+    const ok = canPlaceTile(t) && S.minerals >= def.costM && S.gas >= def.costG;
     const col = ok ? "255, 210, 60" : "255, 83, 71";
     const p = center(t);
     ctx.save();
@@ -1045,7 +1339,7 @@ function drawGhost(): void {
     ctx.fillStyle = ok ? "#ffd23c" : "#ff5347";
     ctx.font = "bold 11px monospace";
     ctx.textAlign = "center";
-    ctx.fillText(`${def.name} ${def.cost} ◆`, p.x, t.y * TILE - 4);
+    ctx.fillText(`${def.name} ${costText(def.costM, def.costG)} · ${def.time}s`, p.x, t.y * TILE - 4);
     ctx.restore();
   } else if (canPlaceTile(t) && !structAt(t) && !barrelAt(t)) {
     ctx.fillStyle = "rgba(255, 210, 60, 0.06)";
@@ -1057,10 +1351,12 @@ function draw(): void {
   ctx.save();
   if (S.shake > 0) ctx.translate((Math.random() - 0.5) * S.shake, (Math.random() - 0.5) * S.shake);
   drawBg();
+  drawMinerals();
   drawGates();
   drawBase();
   for (const b of S.barrels) drawBarrel(b);
   for (const s of S.structs) drawStruct(s);
+  drawHero();
   const sorted = [...S.packs].sort((a, b) => a.y - b.y);
   for (const p of sorted) drawPack(p);
   drawProjs();
@@ -1090,20 +1386,20 @@ function draw(): void {
     ctx.fillStyle = "#ffd23c";
     ctx.strokeStyle = "rgba(0,0,0,0.8)";
     ctx.lineWidth = 4;
-    ctx.font = "bold 32px monospace";
+    ctx.font = "bold 30px monospace";
     ctx.textAlign = "center";
-    ctx.strokeText(S.banner, W / 2, 40);
-    ctx.fillText(S.banner, W / 2, 40);
+    ctx.strokeText(S.banner, W / 2, 44);
+    ctx.fillText(S.banner, W / 2, 44);
     ctx.globalAlpha = 1;
   }
   ctx.textAlign = "center";
-  ctx.font = "bold 15px monospace";
-  if (S.started && S.phase === "prep") {
+  ctx.font = "bold 14px monospace";
+  if (S.started && S.phase === "build") {
     ctx.fillStyle = "#ffd23c";
-    ctx.fillText(`NEXT WAVE IN ${Math.ceil(S.phaseT)}s — build (1-3), shoot barrels for gold, click packs to shoot!`, W / 2, H - 14);
-  } else if (S.started && S.phase === "fight") {
+    ctx.fillText(`NEXT SIEGE IN ${Math.ceil(S.siegeT)}s — build (1-6), research (Q/W/E), click to shoot`, W / 2, H - 12);
+  } else if (S.started && S.phase === "siege") {
     ctx.fillStyle = "#ff8c7a";
-    ctx.fillText(`WAVE ${S.wave} — ${S.packs.length + S.queue.length} packs inbound · gates reroll each wave!`, W / 2, H - 14);
+    ctx.fillText(`⚔ SIEGE ${S.siege} — ${S.packs.length + S.queue.length} hostiles · shoot ☢ barrels for bigger guns!`, W / 2, H - 12);
   }
   if (S.paused && S.started) {
     ctx.fillStyle = "rgba(0,0,0,0.55)";

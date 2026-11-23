@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-body.gaterush {
+body.siege {
   min-height: 100vh;
   background: radial-gradient(1200px 600px at 50% -10%, #1a1408 0%, #0b0a06 55%, #060503 100%);
   color: #e8dcc8;

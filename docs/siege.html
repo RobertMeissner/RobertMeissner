@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Siege — Terran shelter defense</title>
+  <link rel="stylesheet" href="css/siege.css" />
+</head>
+<body class="siege">
+  <noscript>
+    <div class="noscript-info">&#9888; JavaScript is disabled &mdash; this page needs JavaScript to run. Please enable it in your browser settings.</div>
+  </noscript>
+
+  <header class="gr-header">
+    <a class="gr-back" href="index.html">&#9664; INDEX</a>
+    <h1>&#9876;&#65039; SIEGE <span>// TERRAN SHELTER</span></h1>
+    <p class="gr-sub">a last-human-final-stand-style shelter defense &mdash; build between sieges, hold during them</p>
+  </header>
+
+  <main class="gr-stage">
+    <section class="gr-scene">
+      <div class="gr-hud">
+        <div class="chip big"><span>MINERALS</span><b id="minerals">0</b></div>
+        <div class="chip"><span>GAS</span><b id="gas">0</b></div>
+        <div class="chip"><span>STORE</span><b id="store">0</b></div>
+        <div class="chip cc-chip"><span>CC HULL</span><b id="baseHp">0</b><div class="cc-bar"><div id="baseFill"></div></div></div>
+        <div class="chip"><span>SIEGE</span><b id="siege">—</b></div>
+        <div class="chip"><span>GUN</span><b id="gun">Lv 0</b></div>
+        <div class="chip"><span>KILLS</span><b id="kills">0</b></div>
+        <div class="chip"><span>BEST</span><b id="best">0</b></div>
+      </div>
+      <div class="gr-canvas-wrap">
+        <canvas id="scene" width="960" height="540"></canvas>
+        <div id="overlay" class="gr-overlay">
+          <h2 id="ovTitle">SIEGE // TERRAN SHELTER</h2>
+          <p id="ovText">The zerg horde hits your Command Center in timed sieges. Between sieges: mine minerals (edge fields tick automatically), build walls, turrets, bunkers, depots, refineries and a lab, and run research. During a siege: packs pour through edge gates that roll arithmetic ops (+ &minus; &times; &divide;) changing their fighter count &mdash; click to shoot them yourself, and shoot the &#9762; barrels for scrap to forge bigger guns. Survive as many sieges as you can!</p>
+          <button id="ovBtn" type="button">&#9654; START DEFENSE</button>
+        </div>
+      </div>
+      <div class="gr-controls">
+        <button id="pauseBtn" type="button">&#9208;&#65039; PAUSE (P)</button>
+        <button id="restartBtn" type="button">&#8635; RESTART</button>
+      </div>
+    </section>
+
+    <aside class="gr-side">
+      <h2>BUILD</h2>
+      <div id="buildList"></div>
+
+      <h2>RESEARCH</h2>
+      <p id="researchStatus" class="gr-note"></p>
+      <div id="researchList"></div>
+
+      <h2>SELECTED</h2>
+      <div id="selPanel" class="hidden">
+        <p id="tpName" class="gr-tp-name"></p>
+        <p id="tpStats" class="gr-tp-stats"></p>
+        <div class="gr-tp-btns">
+          <button id="upBtn" type="button">&#11014; UPGRADE</button>
+          <button id="sellBtn" type="button">SELL</button>
+        </div>
+      </div>
+
+      <h2>FIELD MANUAL</h2>
+      <p class="gr-note">left-click: shoot there / place building / select building &middot; right-click or ESC: cancel</p>
+      <p class="gr-note">1-6: pick building, click a tile to build (timed construction) &middot; Q/W/E: research (needs Lab)</p>
+      <p class="gr-note">U: upgrade selected defense &middot; X: sell &middot; P: pause &middot; click &#9762; barrels during sieges!</p>
+      <p class="gr-note">walls soak hits, idle guns pop barrels. desktop recommended.</p>
+    </aside>
+  </main>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/siege.js"></script>
+</body>
+</html>
