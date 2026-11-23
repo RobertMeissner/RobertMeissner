@@ -104,25 +104,24 @@ body.marinerun {
   text-shadow: 0 0 10px rgba(255, 210, 60, 0.6);
 }
 
-.cc-chip {
-  min-width: 130px;
+.mr-banner {
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  color: #ffd23c;
+  text-shadow: 0 0 18px rgba(255, 210, 60, 0.8);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
-.cc-bar {
-  margin-top: 3px;
-  height: 5px;
-  background: #241d0e;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-#baseFill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #ff5347, #ffd23c, #5df08a);
-  background-size: 130px 100%;
-  background-position: right;
-  transition: width 0.15s;
+.mr-banner.show {
+  opacity: 1;
 }
 
 .mr-canvas-wrap {
@@ -238,143 +237,6 @@ body.marinerun {
 
 .mr-side h2:first-child {
   margin-top: 0;
-}
-
-.mr-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  width: 100%;
-  text-align: left;
-  font-family: inherit;
-  color: #e8dcc8;
-  background: #14100a;
-  border: 2px solid #4a3d1c;
-  border-radius: 7px;
-  padding: 0.45rem 0.6rem;
-  margin-bottom: 0.45rem;
-  cursor: pointer;
-  transition: border-color 0.1s, background 0.1s;
-}
-
-.mr-btn:hover:not(:disabled) {
-  border-color: #ffd23c;
-  background: #221a0c;
-}
-
-.mr-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.mr-btn.selected {
-  border-color: #ffd23c;
-  background: #2a220e;
-  box-shadow: 0 0 10px rgba(255, 210, 60, 0.25);
-}
-
-.b-icon {
-  font-size: 1.15rem;
-  width: 1.6rem;
-  text-align: center;
-}
-
-.b-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.b-name {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-}
-
-.b-desc {
-  display: block;
-  font-size: 0.62rem;
-  color: #9a8a6a;
-}
-
-.b-side {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-}
-
-.b-side kbd {
-  font-family: inherit;
-  font-size: 0.6rem;
-  color: #060503;
-  background: #ffd23c;
-  border-radius: 3px;
-  padding: 0 4px;
-}
-
-.b-extra {
-  font-size: 0.62rem;
-  color: #ffd23c;
-}
-
-.b-cost {
-  font-size: 0.72rem;
-  font-weight: bold;
-  color: #ffd23c;
-}
-
-#towerPanel {
-  background: #14100a;
-  border: 2px solid #4a3d1c;
-  border-radius: 7px;
-  padding: 0.55rem 0.65rem;
-}
-
-#towerPanel.hidden {
-  display: none;
-}
-
-.mr-tp-name {
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #ffd23c;
-}
-
-.mr-tp-stats {
-  font-size: 0.66rem;
-  color: #9a8a6a;
-  margin: 0.2rem 0 0.45rem;
-}
-
-.mr-tp-btns {
-  display: flex;
-  gap: 0.45rem;
-}
-
-.mr-tp-btns button {
-  flex: 1;
-  font-family: inherit;
-  font-size: 0.68rem;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  padding: 0.4rem 0.3rem;
-  color: #060503;
-  background: #ffd23c;
-  border: 2px solid #8a6a10;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.mr-tp-btns button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.mr-tp-btns #sellBtn {
-  color: #e8dcc8;
-  background: #2a2114;
-  border-color: #4a3d1c;
 }
 
 .mr-note {

@@ -1,783 +1,774 @@
-"use strict";
-(() => {
-  // docs/src/sfx.ts
-  var ctx = null;
-  function ensureAudio() {
-    if (!ctx) {
-      const AC = window.AudioContext ?? window.webkitAudioContext;
-      if (!AC) throw new Error("WebAudio not supported");
-      ctx = new AC();
-    }
-    if (ctx.state === "suspended") ctx.resume();
-    return ctx;
-  }
-  function beep(freq = 440, dur = 0.08, type = "square", vol = 0.05, slide = 0) {
-    try {
-      const a = ensureAudio();
-      const o = a.createOscillator();
-      const g = a.createGain();
-      o.type = type;
-      o.frequency.setValueAtTime(freq, a.currentTime);
-      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), a.currentTime + dur);
-      g.gain.setValueAtTime(vol, a.currentTime);
-      g.gain.exponentialRampToValueAtTime(1e-4, a.currentTime + dur);
-      o.connect(g).connect(a.destination);
-      o.start();
-      o.stop(a.currentTime + dur);
-    } catch (e) {
-    }
-  }
-  function chord(freqs, dur = 0.25, type = "triangle", vol = 0.06) {
-    freqs.forEach((f, i) => setTimeout(() => beep(f, dur, type, vol), i * 45));
-  }
+// docs/src/marinerun.ts
+import * as THREE from "three";
 
-  // docs/src/marinerun.ts
-  var $ = (id) => document.getElementById(id);
-  var canvas = $("scene");
-  var ctx2 = canvas.getContext("2d");
-  var W = canvas.width;
-  var H = canvas.height;
-  var GROUND = 470;
-  var PX = 170;
-  var SAVE_KEY = "rfp_marinerun_best_v1";
-  var S;
-  var best = 0;
-  var fmt = (n) => String(Math.floor(n));
-  var clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  function applyOp(count, op, val) {
-    if (op === "+") return count + val;
-    if (op === "-") return Math.max(0, count - val);
-    if (op === "\xD7") return count * val;
-    return Math.max(1, Math.floor(count / val));
+// docs/src/sfx.ts
+var ctx = null;
+function ensureAudio() {
+  if (!ctx) {
+    const AC = window.AudioContext ?? window.webkitAudioContext;
+    if (!AC) throw new Error("WebAudio not supported");
+    ctx = new AC();
   }
-  function rollGateOp() {
-    const r = Math.random();
-    if (r < 0.35) return { op: "+", val: 10 + Math.floor(Math.random() * 8) * 5 };
-    if (r < 0.6) return { op: "-", val: 5 + Math.floor(Math.random() * 6) * 5 };
-    if (r < 0.85) return { op: "\xD7", val: 2 + Math.floor(Math.random() * 2) };
-    return { op: "\xF7", val: 2 + Math.floor(Math.random() * 2) };
+  if (ctx.state === "suspended") ctx.resume();
+  return ctx;
+}
+function beep(freq = 440, dur = 0.08, type = "square", vol = 0.05, slide = 0) {
+  try {
+    const a = ensureAudio();
+    const o = a.createOscillator();
+    const g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, a.currentTime);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), a.currentTime + dur);
+    g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(1e-4, a.currentTime + dur);
+    o.connect(g).connect(a.destination);
+    o.start();
+    o.stop(a.currentTime + dur);
+  } catch (e) {
   }
-  function reset() {
-    S = {
-      worldX: 0,
-      speed: 200,
-      level: 1,
-      count: 20,
-      playerY: 300,
-      targetY: 300,
-      fireCd: 0,
-      gates: [],
-      enemies: [],
-      bullets: [],
-      spines: [],
-      pickups: [],
-      spikes: [],
-      turrets: [],
-      parts: [],
-      floats: [],
-      nextSpawnX: 700,
-      boss: null,
-      phase: "run",
-      shake: 0,
-      banner: "",
-      bannerT: 0,
-      paused: false,
-      started: false,
-      time: 0,
-      hudT: 0,
-      keys: {},
-      mouseY: 300
-    };
+}
+function chord(freqs, dur = 0.25, type = "triangle", vol = 0.06) {
+  freqs.forEach((f, i) => setTimeout(() => beep(f, dur, type, vol), i * 45));
+}
+
+// docs/src/marinerun.ts
+var $ = (id) => document.getElementById(id);
+var canvas = $("scene");
+var W = canvas.width;
+var H = canvas.height;
+var SAVE_KEY = "rfp_marinerun_best_v1";
+var LANES = [-2.4, 0, 2.4];
+var PLAYER_Z = 0;
+var S;
+var best = 0;
+var fmt = (n) => String(Math.floor(n));
+var clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+function applyOp(count, op, val) {
+  if (op === "+") return count + val;
+  if (op === "-") return Math.max(0, count - val);
+  if (op === "\xD7") return count * val;
+  return Math.max(1, Math.floor(count / val));
+}
+function rollGateOp() {
+  const r = Math.random();
+  if (r < 0.35) return { op: "+", val: 10 + Math.floor(Math.random() * 8) * 5 };
+  if (r < 0.6) return { op: "-", val: 5 + Math.floor(Math.random() * 6) * 5 };
+  if (r < 0.85) return { op: "\xD7", val: 2 + Math.floor(Math.random() * 2) };
+  return { op: "\xF7", val: 2 + Math.floor(Math.random() * 2) };
+}
+function reset() {
+  S = {
+    worldZ: 0,
+    speed: 13,
+    level: 1,
+    count: 20,
+    gunLvl: 0,
+    lane: 1,
+    laneX: LANES[1],
+    fireCd: 0,
+    walls: [],
+    packs: [],
+    targets: [],
+    guns: [],
+    spikes: [],
+    bullets: [],
+    spines: [],
+    spawnCursor: 26,
+    boss: null,
+    phase: "run",
+    shake: 0,
+    banner: "",
+    bannerT: 0,
+    paused: false,
+    started: false,
+    time: 0,
+    hudT: 0,
+    keys: {},
+    mouseX: W / 2,
+    mouseActive: false
+  };
+}
+function loadBest() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) return JSON.parse(raw).best ?? 0;
+  } catch (e) {
   }
-  function loadBest() {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (raw) return JSON.parse(raw).best ?? 0;
-    } catch (e) {
-    }
-    return 0;
+  return 0;
+}
+function saveBest() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ best }));
+  } catch (e) {
   }
-  function saveBest() {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ best }));
-    } catch (e) {
-    }
-  }
-  function toast(msg) {
-    const t = document.createElement("div");
-    t.className = "toast";
-    t.textContent = msg;
-    $("toasts").appendChild(t);
-    setTimeout(() => t.classList.add("show"), 10);
-    setTimeout(() => {
-      t.classList.remove("show");
-      setTimeout(() => t.remove(), 400);
-    }, 3500);
-  }
-  function banner(txt) {
-    S.banner = txt;
-    S.bannerT = 2.2;
-  }
-  function spark(x, y, color, n, spd = 120) {
-    for (let i = 0; i < n; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const v = spd * (0.4 + Math.random());
-      S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: 0.3 + Math.random() * 0.4, max: 0.7, size: 1.5 + Math.random() * 2.5, color });
-    }
-  }
-  function levelEnd() {
-    return 3e3 + S.level * 900;
-  }
-  function spawnGatePair(wx) {
-    const a = rollGateOp();
-    const b = rollGateOp();
-    S.gates.push({ wx, gy: 185, op: a.op, val: a.val, used: false });
-    S.gates.push({ wx: wx + 90, gy: 370, op: b.op, val: b.val, used: false });
-  }
-  function spawnEnemy(wx) {
-    const r = Math.random();
-    const lvl = S.level;
-    if (r < 0.65) {
-      S.enemies.push({
-        wx,
-        wy: GROUND - 22,
-        count: Math.round(5 + Math.random() * 18 + lvl * 4),
-        maxCount: 0,
-        speed: 30 + Math.random() * 50 + lvl * 5,
-        r: 24,
-        color: "#ff5347",
-        type: "zergling",
-        ranged: false,
-        cd: 0,
-        wob: Math.random() * 10,
-        dead: false
-      });
-    } else {
-      S.enemies.push({
-        wx,
-        wy: GROUND - 30,
-        count: Math.round(12 + Math.random() * 20 + lvl * 6),
-        maxCount: 0,
-        speed: 12 + Math.random() * 20,
-        r: 30,
-        color: "#8ee04f",
-        type: "hydralisk",
-        ranged: true,
-        cd: 1,
-        wob: Math.random() * 10,
-        dead: false
-      });
-    }
-    const e = S.enemies[S.enemies.length - 1];
-    e.maxCount = e.count;
-  }
-  function spawnBoss(wx) {
-    const e = {
-      wx,
-      wy: GROUND - 46,
-      count: 50 + 25 * S.level,
-      maxCount: 50 + 25 * S.level,
-      speed: 0,
-      r: 46,
-      color: "#e0447c",
-      type: "ultralisk",
-      ranged: false,
-      cd: 0,
-      wob: 0,
-      dead: false
-    };
-    S.boss = e;
-    S.enemies.push(e);
-    banner(`\u26A0 LEVEL ${S.level} BOSS \u2014 ULTRALISK (${e.count}) \u26A0`);
-    beep(70, 0.8, "sawtooth", 0.1, -30);
-    S.shake = 12;
-  }
-  function spawnPattern(wx) {
-    const r = Math.random();
-    if (r < 0.34) spawnGatePair(wx);
-    else if (r < 0.62) spawnEnemy(wx);
-    else if (r < 0.74) S.pickups.push({ wx: wx + 40, amount: 5 + Math.floor(Math.random() * 3) * 5 + S.level * 2, taken: false });
-    else if (r < 0.86) S.spikes.push({ wx, dmg: 6 + S.level * 2, used: false });
-    else if (r < 0.96) S.turrets.push({ wx, hp: 8 + S.level * 3, maxHp: 8 + S.level * 3, cd: 1, dead: false });
-  }
-  function floatAt(wx, y, txt, color, size = 16) {
-    S.floats.push({ x: wx - S.worldX + PX, y, txt, life: 1.1, color, size });
-  }
-  function gameOver() {
-    S.phase = "over";
-    best = Math.max(best, Math.floor(S.worldX / 50));
-    saveBest();
-    S.shake = 20;
-    beep(90, 1, "sawtooth", 0.1, -50);
-    chord([330, 262, 196, 131], 0.6, "triangle", 0.06);
-    $("ovTitle").textContent = "\u{1F480} SQUAD WIPED OUT";
-    $("ovText").textContent = `Your squad hit zero at ${fmt(S.worldX / 50)}m on level ${S.level}. Best distance: ${best}m.`;
-    $("ovBtn").textContent = "\u21BB RUN AGAIN";
-    $("overlay").classList.remove("hidden");
-  }
-  function startGame() {
-    reset();
-    S.started = true;
-    $("overlay").classList.add("hidden");
-    banner("RUN! GUNS HOT \u2014 PICK YOUR GATES");
-    chord([392, 523, 659], 0.3, "triangle", 0.06);
-    updateHud();
-  }
-  function levelCleared() {
-    banner(`LEVEL ${S.level} CLEARED!`);
-    chord([523, 659, 784, 1046], 0.35, "triangle", 0.06);
-    toast(`Level ${S.level} cleared! +25 fighters, next level faster & meaner`);
-    S.level++;
-    S.count = Math.min(999, S.count + 25);
-    S.speed += 14;
-    S.boss = null;
-    S.nextSpawnX = Math.max(S.nextSpawnX, S.worldX + 900);
-  }
-  function update(dt) {
-    S.time += dt;
-    const prevX = S.worldX;
-    S.worldX += S.speed * dt;
-    while (S.nextSpawnX < S.worldX + 1300) {
-      spawnPattern(S.nextSpawnX);
-      S.nextSpawnX += 480 + Math.random() * 520;
-    }
-    if (!S.boss && S.worldX > levelEnd() - 600) spawnBoss(levelEnd());
-    if (S.keys["KeyW"] || S.keys["ArrowUp"]) S.targetY -= 300 * dt;
-    if (S.keys["KeyS"] || S.keys["ArrowDown"]) S.targetY += 300 * dt;
-    S.targetY = clamp(S.targetY, 130, GROUND - 26);
-    S.playerY += (S.targetY - S.playerY) * Math.min(1, 12 * dt);
-    S.fireCd -= dt;
-    if (S.fireCd <= 0) {
-      S.fireCd = 0.12;
-      S.bullets.push({ wx: S.worldX + 26, wy: S.playerY - 8 });
-      S.parts.push({ x: S.worldX + 30 - S.worldX + PX, y: S.playerY - 8, vx: 60, vy: 0, life: 0.06, max: 0.06, size: 4, color: "#ffe08a" });
-      beep(880 + Math.random() * 160, 0.025, "square", 0.016, -250);
-    }
-    for (const b of S.bullets) b.wx += 780 * dt;
-    S.bullets = S.bullets.filter((b) => b.wx < S.worldX + W);
-    for (const b of S.bullets) {
-      for (const e of S.enemies) {
-        if (e.dead) continue;
-        if (Math.abs(b.wx - e.wx) < e.r + 4 && Math.abs(b.wy - e.wy) < e.r + 8) {
-          e.count--;
-          spark(b.wx - S.worldX + PX, b.wy, e.color, 3, 90);
-          b.wx = Infinity;
-          if (e.count <= 0) {
-            e.dead = true;
-            killNote(e);
-          }
-          break;
-        }
-      }
-      for (const t of S.turrets) {
-        if (t.dead || b.wx === Infinity) continue;
-        if (Math.abs(b.wx - t.wx) < 18 && Math.abs(b.wy - (GROUND - 40)) < 26) {
-          t.hp--;
-          spark(b.wx - S.worldX + PX, b.wy, "#ff8c42", 4, 90);
-          b.wx = Infinity;
-          if (t.hp <= 0) {
-            t.dead = true;
-            spark(t.wx - S.worldX + PX, GROUND - 40, "#ff8c42", 18, 150);
-            beep(120, 0.25, "sawtooth", 0.06, -70);
-          }
-          break;
-        }
-      }
-    }
-    S.bullets = S.bullets.filter((b) => b.wx !== Infinity);
-    for (const e of S.enemies) {
-      if (e.dead) continue;
-      e.wob += dt * 6;
-      if (e.type !== "ultralisk") e.wx -= e.speed * dt;
-      if (e.ranged) {
-        e.cd -= dt;
-        if (e.cd <= 0 && Math.abs(e.wx - S.worldX) < 340 && e.wx > S.worldX) {
-          e.cd = 1.3;
-          const dx = S.worldX - e.wx, dy = S.playerY - 10 - e.wy;
-          const d = Math.hypot(dx, dy) || 1;
-          S.spines.push({ wx: e.wx, wy: e.wy, vx: dx / d * 430, vy: dy / d * 430 });
-          beep(320, 0.05, "sawtooth", 0.02, 60);
-        }
-      }
-      if (Math.abs(e.wx - S.worldX) < e.r + 22 && Math.abs(e.wy - S.playerY) < e.r + 18) {
-        if (S.count > e.count) {
-          S.count -= e.count;
-          e.dead = true;
-          killNote(e);
-          floatAt(S.worldX, S.playerY - 40, `-${e.count}`, "#ffd23c", 18);
-          S.shake = Math.max(S.shake, 6);
-          beep(160, 0.15, "sawtooth", 0.06, -60);
-        } else {
-          S.count = 0;
-          e.dead = true;
-          spark(PX, S.playerY, "#aebfd2", 30, 180);
-          gameOver();
-          return;
-        }
-      }
-    }
-    S.enemies = S.enemies.filter((e) => !e.dead && e.wx > S.worldX - 160);
-    if (S.boss && S.boss.dead) {
-      levelCleared();
-    }
-    for (const g of S.gates) {
-      if (g.used) continue;
-      if (prevX < g.wx && S.worldX >= g.wx && Math.abs(S.playerY - g.gy) < 58) {
-        g.used = true;
-        const before = S.count;
-        S.count = Math.min(999, applyOp(S.count, g.op, g.val));
-        const good = S.count >= before;
-        floatAt(S.worldX, S.playerY - 46, `${g.op}${g.val}: ${before} \u2192 ${S.count}`, good ? "#5df08a" : "#ff5f6e", 18);
-        beep(good ? 880 : 240, 0.14, "square", 0.05, good ? 220 : -120);
-        if (S.count <= 0) {
-          gameOver();
-          return;
-        }
-      }
-    }
-    S.gates = S.gates.filter((g) => g.wx > S.worldX - 120);
-    for (const p of S.pickups) {
-      if (p.taken) continue;
-      if (Math.abs(p.wx - S.worldX) < 26 && Math.abs(GROUND - 34 - S.playerY) < 40) {
-        p.taken = true;
-        S.count = Math.min(999, S.count + p.amount);
-        floatAt(S.worldX, S.playerY - 40, `+${p.amount}`, "#5df08a", 18);
-        beep(1250, 0.06, "sine", 0.04, 200);
-      }
-    }
-    S.pickups = S.pickups.filter((p) => !p.taken && p.wx > S.worldX - 120);
-    for (const s of S.spikes) {
-      if (s.used) continue;
-      if (prevX < s.wx && S.worldX >= s.wx && S.playerY > GROUND - 46) {
-        s.used = true;
-        S.count = Math.max(0, S.count - s.dmg);
-        floatAt(S.worldX, S.playerY - 40, `-${s.dmg} spikes!`, "#ff5f6e", 16);
-        S.shake = Math.max(S.shake, 7);
-        beep(140, 0.2, "sawtooth", 0.07, -60);
-        if (S.count <= 0) {
-          gameOver();
-          return;
-        }
-      }
-    }
-    S.spikes = S.spikes.filter((s) => s.wx > S.worldX - 120);
-    for (const t of S.turrets) {
-      if (t.dead) continue;
-      t.cd -= dt;
-      if (t.cd <= 0 && Math.abs(t.wx - S.worldX) < 360 && t.wx > S.worldX) {
-        t.cd = 1.15;
-        const dx = S.worldX - t.wx, dy = S.playerY - 12 - (GROUND - 40);
-        const d = Math.hypot(dx, dy) || 1;
-        S.spines.push({ wx: t.wx, wy: GROUND - 40, vx: dx / d * 460, vy: dy / d * 460 });
-        beep(300, 0.05, "sawtooth", 0.02, 60);
-      }
-    }
-    S.turrets = S.turrets.filter((t) => !t.dead && t.wx > S.worldX - 160);
-    for (const sp of S.spines) {
-      sp.wx += sp.vx * dt;
-      sp.wy += sp.vy * dt;
-      if (Math.abs(sp.wx - S.worldX) < 15 && Math.abs(sp.wy - (S.playerY - 8)) < 15) {
-        sp.wx = -Infinity;
-        S.count = Math.max(0, S.count - 1);
-        floatAt(S.worldX, S.playerY - 40, "-1", "#c6ff4d", 13);
-        if (S.count <= 0) {
-          gameOver();
-          return;
-        }
-      }
-    }
-    S.spines = S.spines.filter((sp) => sp.wx > S.worldX - 60 && sp.wx !== -Infinity);
-    for (const p of S.parts) {
-      p.life -= dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vy += 300 * dt;
-    }
-    S.parts = S.parts.filter((p) => p.life > 0);
-    for (const f of S.floats) {
-      f.life -= dt;
-      f.y -= 30 * dt;
-    }
-    S.floats = S.floats.filter((f) => f.life > 0);
-    S.shake = Math.max(0, S.shake - dt * 30);
-    S.bannerT = Math.max(0, S.bannerT - dt);
-  }
-  function killNote(e) {
-    spark(e.wx - S.worldX + PX, e.wy, e.color, e.type === "ultralisk" ? 40 : 14, e.type === "ultralisk" ? 180 : 110);
-    if (e.type === "ultralisk") {
-      S.shake = Math.max(S.shake, 14);
-      beep(60, 0.7, "sawtooth", 0.1, -25);
-    } else {
-      beep(200 + Math.random() * 120, 0.06, "square", 0.025, -120);
-      if (Math.random() < 0.2) S.pickups.push({ wx: e.wx + 30, amount: 5 + Math.floor(Math.random() * 10), taken: false });
-    }
-  }
-  function canvasY(e) {
-    const r = canvas.getBoundingClientRect();
-    return (e.clientY - r.top) * H / r.height;
-  }
-  canvas.addEventListener("mousemove", (e) => {
-    S.mouseY = canvasY(e);
-    if (S.started && S.phase !== "over") S.targetY = clamp(S.mouseY, 130, GROUND - 26);
-  });
-  canvas.addEventListener("mousedown", () => {
-    if (S.started && S.phase !== "over") S.targetY = clamp(S.mouseY, 130, GROUND - 26);
-  });
-  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code.startsWith("Arrow")) e.preventDefault();
-    S.keys[e.code] = true;
-    if (!S.started || S.phase === "over") return;
-    if (e.code === "KeyP") S.paused = !S.paused;
-  });
-  window.addEventListener("keyup", (e) => {
-    S.keys[e.code] = false;
-  });
-  $("ovBtn").addEventListener("click", () => startGame());
-  $("pauseBtn").addEventListener("click", () => {
-    if (S.started && S.phase !== "over") S.paused = !S.paused;
-  });
-  $("restartBtn").addEventListener("click", () => startGame());
-  window.addEventListener("beforeunload", saveBest);
-  function updateHud() {
-    const c = $("count");
-    c.textContent = fmt(S.count);
-    c.style.color = S.count > 40 ? "#5df08a" : S.count > 15 ? "#ffd23c" : "#ff5347";
-    $("level").textContent = String(S.level);
-    $("dist").textContent = `${fmt(S.worldX / 50)}m`;
-    $("best").textContent = `${best}m`;
-  }
-  var RUINS = Array.from({ length: 40 }, (_, i) => ({
-    w: 60 + Math.random() * 130,
-    h: 60 + Math.random() * 190,
-    gap: 200 + Math.random() * 260,
-    x: i * 300
-  }));
-  var STARS2 = Array.from({ length: 80 }, () => ({
-    x: Math.random() * W,
-    y: Math.random() * (GROUND - 160),
-    r: Math.random() * 1.5 + 0.3,
-    a: Math.random() * 0.5 + 0.2
-  }));
-  var sx = (wx) => wx - S.worldX + PX;
-  function drawBg() {
-    const g = ctx2.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#0a1024");
-    g.addColorStop(0.65, "#131a30");
-    g.addColorStop(1, "#1d1430");
-    ctx2.fillStyle = g;
-    ctx2.fillRect(0, 0, W, H);
-    for (const s of STARS2) {
-      ctx2.globalAlpha = s.a * (0.7 + 0.3 * Math.sin(S.time * 2 + s.x));
-      ctx2.fillStyle = "#cfe6ff";
-      ctx2.beginPath();
-      ctx2.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx2.fill();
-    }
-    ctx2.globalAlpha = 1;
-    ctx2.fillStyle = "#101828";
-    const off = S.worldX * 0.35 % 300;
-    for (const r of RUINS) {
-      const x = r.x - off - 150;
-      if (x > W + 100 || x < -300) continue;
-      ctx2.fillRect(x, GROUND - r.h, r.w, r.h);
-      ctx2.fillStyle = "#0c1220";
-      ctx2.fillRect(x + 10, GROUND - r.h + 12, r.w - 20, 8);
-      ctx2.fillStyle = "#101828";
-    }
-    ctx2.fillStyle = "#1a1410";
-    ctx2.fillRect(0, GROUND, W, H - GROUND);
-    ctx2.fillStyle = "#2a2015";
-    ctx2.fillRect(0, GROUND, W, 6);
-    ctx2.strokeStyle = "rgba(255, 210, 60, 0.12)";
-    ctx2.lineWidth = 2;
-    const coff = S.worldX % 90;
-    for (let x = -coff; x < W; x += 90) {
-      ctx2.beginPath();
-      ctx2.moveTo(x, GROUND + 6);
-      ctx2.lineTo(x + 26, H);
-      ctx2.stroke();
-    }
-    ctx2.fillStyle = "#ffd23c";
-    ctx2.font = "bold 12px monospace";
-    ctx2.textAlign = "left";
-    const prog = clamp(S.worldX % levelEnd() / levelEnd(), 0, 1);
-    ctx2.fillText(`LEVEL ${S.level} PROGRESS`, 20, H - 14);
-    ctx2.fillStyle = "rgba(0,0,0,0.5)";
-    ctx2.fillRect(160, H - 20, 200, 8);
-    ctx2.fillStyle = "#ffd23c";
-    ctx2.fillRect(160, H - 20, 200 * prog, 8);
-  }
-  function drawGate(g) {
-    const x = sx(g.wx);
-    if (x < -80 || x > W + 80) return;
-    const good = g.op === "+" || g.op === "\xD7";
-    const col = g.used ? "#3a4356" : good ? "#5df08a" : "#ff5f6e";
-    ctx2.save();
-    ctx2.translate(x, g.gy);
-    if (!g.used) {
-      ctx2.shadowColor = col;
-      ctx2.shadowBlur = 14 + 4 * Math.sin(S.time * 4 + g.wx);
-    }
-    ctx2.strokeStyle = col;
-    ctx2.lineWidth = 6;
-    ctx2.beginPath();
-    ctx2.moveTo(-34, 52);
-    ctx2.lineTo(-34, -52);
-    ctx2.lineTo(34, -52);
-    ctx2.lineTo(34, 52);
-    ctx2.stroke();
-    ctx2.shadowBlur = 0;
-    ctx2.fillStyle = col;
-    ctx2.font = "bold 26px monospace";
-    ctx2.textAlign = "center";
-    ctx2.fillText(`${g.op}${g.val}`, 0, 9);
-    ctx2.restore();
-  }
-  function drawEnemy(e) {
-    const x = sx(e.wx);
-    if (x < -80 || x > W + 80) return;
-    ctx2.save();
-    ctx2.translate(x, e.wy);
-    ctx2.fillStyle = "rgba(0,0,0,0.35)";
-    ctx2.beginPath();
-    ctx2.ellipse(0, e.r * 0.75, e.r, e.r * 0.4, 0, 0, Math.PI * 2);
-    ctx2.fill();
-    const n = Math.min(9, Math.max(3, Math.round(e.count / (e.type === "ultralisk" ? 30 : 5))));
-    for (let i = 0; i < n; i++) {
-      const a = i / n * Math.PI * 2 + e.wob * 0.15;
-      ctx2.fillStyle = e.color;
-      ctx2.beginPath();
-      ctx2.arc(Math.cos(a) * e.r * 0.55, Math.sin(a) * e.r * 0.4, e.r * 0.3, 0, Math.PI * 2);
-      ctx2.fill();
-    }
-    ctx2.fillStyle = e.color;
-    ctx2.beginPath();
-    ctx2.arc(0, 0, e.r * 0.5, 0, Math.PI * 2);
-    ctx2.fill();
-    if (e.type === "ultralisk") {
-      ctx2.fillStyle = "#f0e8d8";
-      ctx2.beginPath();
-      ctx2.moveTo(-10, -e.r * 0.6);
-      ctx2.lineTo(-5, -e.r - 12);
-      ctx2.lineTo(0, -e.r * 0.6);
-      ctx2.closePath();
-      ctx2.fill();
-      ctx2.beginPath();
-      ctx2.moveTo(10, -e.r * 0.6);
-      ctx2.lineTo(5, -e.r - 12);
-      ctx2.lineTo(0, -e.r * 0.6);
-      ctx2.closePath();
-      ctx2.fill();
-    }
-    ctx2.restore();
-    ctx2.font = "bold 15px monospace";
-    ctx2.textAlign = "center";
-    ctx2.strokeStyle = "rgba(0,0,0,0.85)";
-    ctx2.lineWidth = 3;
-    ctx2.strokeText(String(Math.ceil(e.count)), x, e.wy - e.r - 8);
-    ctx2.fillStyle = "#ffffff";
-    ctx2.fillText(String(Math.ceil(e.count)), x, e.wy - e.r - 8);
-    if (e.count < e.maxCount) {
-      ctx2.fillStyle = "rgba(0,0,0,0.6)";
-      ctx2.fillRect(x - 22, e.wy - e.r - 16, 44, 4);
-      ctx2.fillStyle = "#ffd23c";
-      ctx2.fillRect(x - 22, e.wy - e.r - 16, 44 * clamp(e.count / e.maxCount, 0, 1), 4);
-    }
-  }
-  function drawTurret(t) {
-    const x = sx(t.wx);
-    if (x < -60 || x > W + 60) return;
-    const y = GROUND - 40;
-    ctx2.save();
-    ctx2.translate(x, y);
-    ctx2.fillStyle = "#4a2a3a";
-    ctx2.fillRect(-16, -18, 32, 36);
-    ctx2.strokeStyle = "#8a4a6a";
-    ctx2.lineWidth = 2;
-    ctx2.strokeRect(-16, -18, 32, 36);
-    ctx2.strokeStyle = "#c6ff4d";
-    ctx2.lineWidth = 5;
-    ctx2.beginPath();
-    ctx2.moveTo(0, -18);
-    ctx2.lineTo(-30, -30);
-    ctx2.stroke();
-    ctx2.restore();
-    ctx2.fillStyle = "rgba(0,0,0,0.6)";
-    ctx2.fillRect(x - 18, y - 30, 36, 4);
-    ctx2.fillStyle = "#c6ff4d";
-    ctx2.fillRect(x - 18, y - 30, 36 * clamp(t.hp / t.maxHp, 0, 1), 4);
-  }
-  function drawSpike(s) {
-    const x = sx(s.wx);
-    if (x < -60 || x > W + 60) return;
-    ctx2.fillStyle = s.used ? "#3a3a44" : "#9aa4b5";
-    for (let i = 0; i < 4; i++) {
-      ctx2.beginPath();
-      ctx2.moveTo(x - 34 + i * 17, GROUND);
-      ctx2.lineTo(x - 26 + i * 17, GROUND - 26);
-      ctx2.lineTo(x - 18 + i * 17, GROUND);
-      ctx2.closePath();
-      ctx2.fill();
-    }
-  }
-  function drawPickup(p) {
-    const x = sx(p.wx);
-    if (x < -40 || x > W + 40) return;
-    const y = GROUND - 34;
-    const pulse = 1 + 0.1 * Math.sin(S.time * 5 + p.wx);
-    ctx2.save();
-    ctx2.translate(x, y);
-    ctx2.scale(pulse, pulse);
-    ctx2.shadowColor = "#5df08a";
-    ctx2.shadowBlur = 12;
-    ctx2.fillStyle = "#2a6a3a";
-    ctx2.fillRect(-14, -12, 28, 24);
-    ctx2.shadowBlur = 0;
-    ctx2.strokeStyle = "#5df08a";
-    ctx2.lineWidth = 2;
-    ctx2.strokeRect(-14, -12, 28, 24);
-    ctx2.fillStyle = "#b8ffd0";
-    ctx2.font = "bold 13px monospace";
-    ctx2.textAlign = "center";
-    ctx2.fillText(`+${p.amount}`, 0, 4);
-    ctx2.restore();
-  }
-  function drawPlayer() {
-    const x = PX;
-    const y = S.playerY;
-    const n = Math.min(12, Math.max(1, Math.round(S.count / 4)));
-    for (let i = 0; i < n; i++) {
+}
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  $("toasts").appendChild(t);
+  setTimeout(() => t.classList.add("show"), 10);
+  setTimeout(() => {
+    t.classList.remove("show");
+    setTimeout(() => t.remove(), 400);
+  }, 3500);
+}
+function banner(txt) {
+  S.banner = txt;
+  S.bannerT = 2.2;
+}
+var renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(W, H, false);
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(659492);
+scene.fog = new THREE.Fog(659492, 22, 90);
+var camera = new THREE.PerspectiveCamera(70, W / H, 0.1, 220);
+camera.position.set(0, 4.6, 6.8);
+camera.lookAt(0, 1, -12);
+function box(w, h, d, color) {
+  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ color }));
+}
+function ball(r, color) {
+  return new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), new THREE.MeshBasicMaterial({ color }));
+}
+function makeLabel(text, color) {
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 72;
+  const g = c.getContext("2d");
+  const draw = (txt, col) => {
+    g.clearRect(0, 0, 256, 72);
+    g.font = "bold 44px monospace";
+    g.textAlign = "center";
+    g.lineWidth = 6;
+    g.strokeStyle = "rgba(0,0,0,0.9)";
+    g.strokeText(txt, 128, 50);
+    g.fillStyle = col;
+    g.fillText(txt, 128, 50);
+  };
+  draw(text, color);
+  const tex = new THREE.CanvasTexture(c);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  sp.scale.set(2.4, 0.68, 1);
+  sp.userData = { canvas: c, tex, draw };
+  return sp;
+}
+function setLabel(sp, text, color) {
+  if (!sp || !sp.userData) return;
+  const key = text + "|" + color;
+  if (sp.userData.last === key) return;
+  sp.userData.last = key;
+  sp.userData.draw(text, color);
+  sp.userData.tex.needsUpdate = true;
+}
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 220), new THREE.MeshBasicMaterial({ color: 1446431 }));
+ground.rotation.x = -Math.PI / 2;
+ground.position.set(0, 0, -80);
+scene.add(ground);
+var dashPool = [];
+for (let i = 0; i < 14; i++) {
+  const m = box(0.1, 0.03, 1.8, 3813456);
+  m.position.set(i % 2 === 0 ? -1.2 : 1.2, 0.02, -i * 9);
+  scene.add(m);
+  dashPool.push(m);
+}
+var ruinPool = [];
+for (let i = 0; i < 16; i++) {
+  const h = 2 + Math.random() * 6;
+  const m = box(2.5 + Math.random() * 3, h, 2.5 + Math.random() * 3, 1054760);
+  m.position.set(i % 2 === 0 ? -5.6 : 5.6, h / 2, -i * 8 - Math.random() * 6);
+  scene.add(m);
+  ruinPool.push(m);
+}
+var playerGroup = new THREE.Group();
+scene.add(playerGroup);
+var marineBody = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.3, 0.8, 10), new THREE.MeshBasicMaterial({ color: 11452370 }));
+marineBody.position.y = 0.75;
+playerGroup.add(marineBody);
+var marineHead = box(0.34, 0.26, 0.34, 9413560);
+marineHead.position.y = 1.28;
+playerGroup.add(marineHead);
+var gun = box(0.12, 0.12, 0.9, 2898511);
+gun.position.set(0.25, 0.95, -0.4);
+playerGroup.add(gun);
+var squadDots = [];
+for (let i = 0; i < 8; i++) {
+  const d = ball(0.13, 9413560);
+  playerGroup.add(d);
+  squadDots.push(d);
+}
+var countLabel = null;
+function rebuildPlayer() {
+  playerGroup.position.set(S.laneX, 0, PLAYER_Z);
+  const n = Math.min(8, Math.max(1, Math.round(S.count / 4)));
+  for (let i = 0; i < squadDots.length; i++) {
+    const d = squadDots[i];
+    if (i < n) {
       const a = i / n * Math.PI * 2 + S.time * 2;
-      ctx2.fillStyle = "#8fa3b8";
-      ctx2.beginPath();
-      ctx2.arc(x - 26 + Math.cos(a) * 16, y + Math.sin(a) * 10, 4, 0, Math.PI * 2);
-      ctx2.fill();
-    }
-    ctx2.save();
-    ctx2.translate(x, y);
-    ctx2.fillStyle = "rgba(0,0,0,0.35)";
-    ctx2.beginPath();
-    ctx2.ellipse(0, 12, 13, 5, 0, 0, Math.PI * 2);
-    ctx2.fill();
-    ctx2.fillStyle = "#aebfd2";
-    ctx2.beginPath();
-    ctx2.arc(0, 0, 12, 0, Math.PI * 2);
-    ctx2.fill();
-    ctx2.strokeStyle = "#5f7290";
-    ctx2.lineWidth = 2;
-    ctx2.stroke();
-    ctx2.fillStyle = "#35f0d0";
-    ctx2.fillRect(4, -3, 7, 5);
-    ctx2.strokeStyle = "#2c3a4f";
-    ctx2.lineWidth = 5;
-    ctx2.beginPath();
-    ctx2.moveTo(8, -4);
-    ctx2.lineTo(24, -4);
-    ctx2.stroke();
-    ctx2.restore();
-    ctx2.font = "bold 26px monospace";
-    ctx2.textAlign = "center";
-    ctx2.strokeStyle = "rgba(0,0,0,0.85)";
-    ctx2.lineWidth = 4;
-    ctx2.strokeText(fmt(S.count), x, y - 34);
-    ctx2.fillStyle = S.count > 40 ? "#5df08a" : S.count > 15 ? "#ffd23c" : "#ff5347";
-    ctx2.fillText(fmt(S.count), x, y - 34);
-  }
-  function draw() {
-    ctx2.save();
-    if (S.shake > 0) ctx2.translate((Math.random() - 0.5) * S.shake, (Math.random() - 0.5) * S.shake);
-    drawBg();
-    for (const p of S.pickups) drawPickup(p);
-    for (const s of S.spikes) drawSpike(s);
-    for (const t of S.turrets) drawTurret(t);
-    for (const g of S.gates) drawGate(g);
-    const sorted = [...S.enemies].sort((a, b) => a.wy - b.wy);
-    for (const e of sorted) drawEnemy(e);
-    drawPlayer();
-    for (const b of S.bullets) {
-      const x = sx(b.wx);
-      ctx2.strokeStyle = "#ffe08a";
-      ctx2.lineWidth = 3;
-      ctx2.shadowColor = "#ffe08a";
-      ctx2.shadowBlur = 6;
-      ctx2.beginPath();
-      ctx2.moveTo(x, b.wy);
-      ctx2.lineTo(x - 22, b.wy);
-      ctx2.stroke();
-      ctx2.shadowBlur = 0;
-    }
-    for (const sp of S.spines) {
-      const x = sx(sp.wx);
-      ctx2.strokeStyle = "#c6ff4d";
-      ctx2.lineWidth = 3;
-      ctx2.beginPath();
-      ctx2.moveTo(x, sp.wy);
-      ctx2.lineTo(x - sp.vx * 0.03, sp.wy - sp.vy * 0.03);
-      ctx2.stroke();
-    }
-    for (const p of S.parts) {
-      ctx2.globalAlpha = clamp(p.life / p.max, 0, 1);
-      ctx2.fillStyle = p.color;
-      ctx2.beginPath();
-      ctx2.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx2.fill();
-    }
-    ctx2.globalAlpha = 1;
-    ctx2.textAlign = "center";
-    for (const f of S.floats) {
-      ctx2.globalAlpha = clamp(f.life / 1.1, 0, 1);
-      ctx2.fillStyle = f.color;
-      ctx2.font = `bold ${f.size}px monospace`;
-      ctx2.strokeStyle = "rgba(0,0,0,0.8)";
-      ctx2.lineWidth = 3;
-      ctx2.strokeText(f.txt, f.x, f.y);
-      ctx2.fillText(f.txt, f.x, f.y);
-    }
-    ctx2.globalAlpha = 1;
-    ctx2.restore();
-    if (S.bannerT > 0) {
-      ctx2.globalAlpha = clamp(S.bannerT * 2, 0, 1);
-      ctx2.fillStyle = "#ffd23c";
-      ctx2.strokeStyle = "rgba(0,0,0,0.8)";
-      ctx2.lineWidth = 4;
-      ctx2.font = "bold 28px monospace";
-      ctx2.textAlign = "center";
-      ctx2.strokeText(S.banner, W / 2, 90);
-      ctx2.fillText(S.banner, W / 2, 90);
-      ctx2.globalAlpha = 1;
-    }
-    ctx2.textAlign = "center";
-    ctx2.font = "bold 14px monospace";
-    if (S.started && S.phase === "run") {
-      ctx2.fillStyle = "#ffd23c";
-      ctx2.fillText("steer with mouse / W-S / arrows \u2014 pick the good gates (+ \xD7), dodge the bad ones (\u2212 \xF7)!", W / 2, 26);
-    }
-    if (S.paused && S.started) {
-      ctx2.fillStyle = "rgba(0,0,0,0.55)";
-      ctx2.fillRect(0, 0, W, H);
-      ctx2.fillStyle = "#ffd23c";
-      ctx2.font = "bold 30px monospace";
-      ctx2.fillText("PAUSED \u2014 press P", W / 2, H / 2);
+      d.position.set(-0.55 + Math.cos(a) * 0.5, 0.5 + Math.sin(a) * 0.3, 0.2);
+      d.visible = true;
+    } else {
+      d.visible = false;
     }
   }
-  var last = performance.now();
-  function loop() {
-    requestAnimationFrame(loop);
-    const now = performance.now();
-    let dt = (now - last) / 1e3;
-    last = now;
-    if (dt > 0.05) dt = 0.05;
-    if (S.started && !S.paused && S.phase !== "over") update(dt);
-    draw();
-    S.hudT += dt;
-    if (S.hudT > 0.1) {
-      S.hudT = 0;
-      updateHud();
+  if (!countLabel) {
+    countLabel = makeLabel(fmt(S.count), "#ffd23c");
+    countLabel.position.set(0, 2.1, 0);
+    playerGroup.add(countLabel);
+  }
+  const col = S.count > 40 ? "#5df08a" : S.count > 15 ? "#ffd23c" : "#ff5347";
+  setLabel(countLabel, fmt(S.count), col);
+}
+var SPAWN_Z = -85;
+function bossAt(level) {
+  return 170 + (level - 1) * 150;
+}
+function spawnGateWall(z) {
+  const group = new THREE.Group();
+  group.position.z = z;
+  scene.add(group);
+  const order = [0, 1, 2];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = order[i];
+    order[i] = order[j];
+    order[j] = t;
+  }
+  const nGates = Math.random() < 0.45 ? 3 : 2;
+  const gates = [];
+  for (let i = 0; i < 3; i++) {
+    const lane = order[i];
+    const x = LANES[lane];
+    if (i < nGates) {
+      const g = rollGateOp();
+      const good = g.op === "+" || g.op === "\xD7";
+      const col = good ? 3124831 : 13908527;
+      const postL = box(0.35, 3.4, 0.35, col);
+      postL.position.set(x - 1.05, 1.7, 0);
+      const postR = box(0.35, 3.4, 0.35, col);
+      postR.position.set(x + 1.05, 1.7, 0);
+      const beam = box(2.45, 0.4, 0.5, col);
+      beam.position.set(x, 3.55, 0);
+      group.add(postL);
+      group.add(postR);
+      group.add(beam);
+      const lbl = makeLabel(g.op + g.val, good ? "#5df08a" : "#ff5f6e");
+      lbl.position.set(x, 4.35, 0);
+      lbl.scale.set(2, 0.56, 1);
+      group.add(lbl);
+      gates.push({ lane, op: g.op, val: g.val });
+    } else {
+      const block = box(2.2, 3.6, 0.6, 3810352);
+      block.position.set(x, 1.8, 0);
+      group.add(block);
+      const lbl = makeLabel("WALL", "#ff5f6e");
+      lbl.position.set(x, 4, 0);
+      lbl.scale.set(1.7, 0.48, 1);
+      group.add(lbl);
     }
   }
+  S.walls.push({ group, z, gates, resolved: false });
+}
+function spawnPack(z, lane, count, type) {
+  const group = new THREE.Group();
+  group.position.set(LANES[lane], 0, z);
+  scene.add(group);
+  const color = type === "zergling" ? 13908527 : type === "hydralisk" ? 5884239 : 10181072;
+  const r = type === "ultralisk" ? 1.1 : type === "hydralisk" ? 0.42 : 0.36;
+  const n = Math.min(14, Math.max(4, Math.round(count / 3)));
+  const balls = [];
+  for (let i = 0; i < n; i++) {
+    const b = ball(r, color);
+    const a = Math.random() * Math.PI * 2;
+    const rr = Math.random() * (type === "ultralisk" ? 2.2 : 0.9);
+    b.position.set(Math.cos(a) * rr, r + Math.random() * (type === "ultralisk" ? 2.2 : 0.8), Math.sin(a) * rr * 0.6);
+    group.add(b);
+    balls.push(b);
+  }
+  const label = makeLabel(String(count), "#ff5f6e");
+  label.position.y = type === "ultralisk" ? 5.2 : 2.4;
+  group.add(label);
+  const pack = {
+    group,
+    z,
+    lane,
+    count,
+    maxCount: count,
+    own: type === "zergling" ? 3.5 : type === "ultralisk" ? 0.6 : 0,
+    r: type === "ultralisk" ? 2.4 : 1.2,
+    ranged: type !== "zergling",
+    cd: 1 + Math.random(),
+    label,
+    balls,
+    type,
+    dead: false
+  };
+  S.packs.push(pack);
+  return pack;
+}
+function updatePackVisual(p) {
+  const n = Math.max(0, Math.ceil(p.count / p.maxCount * p.balls.length));
+  for (let i = 0; i < p.balls.length; i++) p.balls[i].visible = i < n;
+  const col = p.type === "zergling" ? "#ff8a7a" : p.type === "hydralisk" ? "#9fe89a" : "#d9a5ff";
+  setLabel(p.label, fmt(Math.max(0, p.count)), col);
+}
+function spawnTargets(z, lane) {
+  for (let i = 0; i < 3; i++) {
+    const group = new THREE.Group();
+    const zz = z - i * 7;
+    group.position.set(LANES[lane], 0, zz);
+    scene.add(group);
+    const pole = box(0.1, 1.6, 0.1, 2898511);
+    pole.position.y = 0.8;
+    const orb = ball(0.42, 5756927);
+    orb.position.y = 1.8;
+    group.add(pole);
+    group.add(orb);
+    const lbl = makeLabel("+5", "#57d7ff");
+    lbl.position.y = 2.6;
+    lbl.scale.set(1.4, 0.4, 1);
+    group.add(lbl);
+    S.targets.push({ group, z: zz, lane, dead: false });
+  }
+}
+function spawnGunCrate(z, lane) {
+  const group = new THREE.Group();
+  group.position.set(LANES[lane], 0, z);
+  scene.add(group);
+  const crate = box(0.9, 0.9, 0.9, 16747050);
+  crate.position.y = 0.75;
+  group.add(crate);
+  const lbl = makeLabel("GUN+", "#ffb14d");
+  lbl.position.y = 2;
+  group.add(lbl);
+  S.guns.push({ group, z, lane, taken: false });
+}
+function spawnSpikes(z, lane) {
+  const group = new THREE.Group();
+  group.position.set(LANES[lane], 0, z);
+  scene.add(group);
+  for (let i = 0; i < 5; i++) {
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.7, 8), new THREE.MeshBasicMaterial({ color: 9081768 }));
+    cone.position.set((i - 2) * 0.45, 0.35, i % 2 * 0.3 - 0.15);
+    group.add(cone);
+  }
+  S.spikes.push({ group, z, lane, dmg: 6 + S.level * 2, used: false });
+}
+function spawnSection(z) {
+  const roles = ["enemy", "targets", "gun"];
+  for (let i = 2; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = roles[i];
+    roles[i] = roles[j];
+    roles[j] = t;
+  }
+  if (Math.random() < 0.4) spawnGateWall(z - 6);
+  for (let lane = 0; lane < 3; lane++) {
+    const role = roles[lane];
+    if (role === "enemy") {
+      const type = Math.random() < 0.65 ? "zergling" : "hydralisk";
+      const count = 8 + Math.floor(Math.random() * 14) + S.level * 4;
+      spawnPack(z, lane, count, type);
+      if (Math.random() < 0.5) {
+        spawnPack(z - 16, lane, Math.max(4, Math.floor(count * 0.5)), Math.random() < 0.5 ? "zergling" : "hydralisk");
+      }
+    } else if (role === "targets") {
+      spawnTargets(z, lane);
+    } else {
+      spawnGunCrate(z, lane);
+    }
+  }
+  if (Math.random() < 0.25 && roles[2] !== "enemy") spawnSpikes(z - 10, 2);
+}
+function spawnBoss() {
+  const count = 60 + 30 * S.level;
+  const boss = spawnPack(-70, 1, count, "ultralisk");
+  boss.cd = 1;
+  S.boss = boss;
+  banner("\u26A0 ULTRALISK INBOUND \u26A0");
+  toast("ULTRALISK \u2014 blast it down before it reaches you!");
+  chord([196, 147], 0.5);
+}
+function killPack(p) {
+  p.dead = true;
+  scene.remove(p.group);
+  if (S.boss === p) {
+    S.boss = null;
+    S.level += 1;
+    S.speed = Math.min(26, S.speed + 1.6);
+    S.count += 25;
+    S.spawnCursor = 20;
+    banner("LEVEL " + S.level + " \u2014 ULTRALISK DOWN! +25");
+    toast("LEVEL UP! speed increased");
+    chord([523, 659, 784], 0.3);
+  }
+}
+function fireBullet() {
+  const mesh = box(0.09, 0.09, 0.7, 16769658);
+  mesh.position.set(S.laneX + 0.25, 0.95, -0.6);
+  scene.add(mesh);
+  S.bullets.push({ mesh, z: -0.6, laneX: S.laneX + 0.25 });
+  beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
+}
+function fireSpine(p) {
+  const x = p.type === "ultralisk" ? S.laneX + (Math.random() - 0.5) * 0.6 : LANES[p.lane] + (Math.random() - 0.5) * 0.8;
+  const y = 0.6 + Math.random() * 0.8;
+  const mesh = ball(0.14, 13193118);
+  mesh.position.set(x, y, p.z);
+  scene.add(mesh);
+  S.spines.push({ mesh, z: p.z, x, y, vz: 20 });
+}
+function takeGun(g) {
+  if (g.taken) return;
+  g.taken = true;
+  S.gunLvl += 1;
+  toast("WEAPON UPGRADED \u2014 Lv" + S.gunLvl);
+  beep(990, 0.1);
+  chord([880, 1108], 0.15);
+  scene.remove(g.group);
+}
+function clearEntities() {
+  if (!S) return;
+  for (const w of S.walls) scene.remove(w.group);
+  for (const p of S.packs) scene.remove(p.group);
+  for (const t of S.targets) scene.remove(t.group);
+  for (const g of S.guns) scene.remove(g.group);
+  for (const s of S.spikes) scene.remove(s.group);
+  for (const b of S.bullets) scene.remove(b.mesh);
+  for (const s of S.spines) scene.remove(s.mesh);
+}
+function gameOver(reason) {
+  if (S.phase !== "run") return;
+  S.phase = "over";
+  S.started = false;
+  const dist = Math.floor(S.worldZ);
+  if (dist > best) {
+    best = dist;
+    saveBest();
+  }
+  $("ovTitle").textContent = "\u2620 WIPED OUT";
+  $("ovText").innerHTML = reason + "<br><br>Level <b>" + S.level + "</b> \xB7 distance <b>" + dist + "m</b> \xB7 best <b>" + best + "m</b>";
+  $("ovBtn").textContent = "\u21BB RUN AGAIN";
+  $("overlay").classList.remove("hidden");
+  chord([220, 165, 110], 0.9);
+}
+function startGame() {
+  clearEntities();
   reset();
   best = loadBest();
+  $("overlay").classList.add("hidden");
+  $("pauseBtn").textContent = "\u23F8\uFE0F PAUSE (P)";
+  rebuildPlayer();
   updateHud();
+  banner("LEVEL " + S.level + " \u2014 GO!");
+  chord([440, 554], 0.25);
+  S.started = true;
+}
+function togglePause() {
+  if (!S.started || S.phase !== "run") return;
+  S.paused = !S.paused;
+  $("pauseBtn").textContent = S.paused ? "\u25B6 RESUME (P)" : "\u23F8\uFE0F PAUSE (P)";
+}
+function update(dt) {
+  S.time += dt;
+  S.worldZ += S.speed * dt;
+  S.shake = Math.max(0, S.shake - dt * 3);
+  if (S.bannerT > 0) S.bannerT -= dt;
+  if (S.mouseActive) {
+    S.lane = S.mouseX < W / 3 ? 0 : S.mouseX < 2 * W / 3 ? 1 : 2;
+  }
+  const targetX = LANES[S.lane];
+  S.laneX += (targetX - S.laneX) * Math.min(1, dt * 12);
+  playerGroup.position.set(S.laneX, 0, PLAYER_Z);
+  playerGroup.rotation.z = (targetX - S.laneX) * 0.12;
+  if (!S.boss) {
+    if (S.worldZ < bossAt(S.level)) {
+      S.spawnCursor -= S.speed * dt;
+      if (S.spawnCursor <= 0) {
+        spawnSection(SPAWN_Z);
+        S.spawnCursor = 13 + Math.random() * 9;
+      }
+    } else {
+      spawnBoss();
+    }
+  }
+  S.fireCd -= dt;
+  if (S.fireCd <= 0) {
+    S.fireCd = Math.max(0.07, 0.13 - S.gunLvl * 8e-3);
+    fireBullet();
+  }
+  const dmg = 1 + S.gunLvl;
+  for (let i = S.bullets.length - 1; i >= 0; i--) {
+    const b = S.bullets[i];
+    b.z -= 55 * dt;
+    b.mesh.position.set(b.laneX, 0.95, b.z);
+    let hit = false;
+    if (b.z > -88) {
+      for (const p of S.packs) {
+        if (p.dead) continue;
+        if (Math.abs(b.z - p.z) < p.r + 0.4 && Math.abs(b.laneX - LANES[p.lane]) < 0.9) {
+          p.count -= dmg;
+          hit = true;
+          if (p.count <= 0) killPack(p);
+          else updatePackVisual(p);
+          break;
+        }
+      }
+      if (!hit) {
+        for (const t of S.targets) {
+          if (t.dead) continue;
+          if (Math.abs(b.z - t.z) < 0.9 && Math.abs(b.laneX - LANES[t.lane]) < 0.9) {
+            t.dead = true;
+            scene.remove(t.group);
+            S.count += 5;
+            toast("+5 FIGHTERS");
+            beep(880, 0.08);
+            hit = true;
+            break;
+          }
+        }
+      }
+      if (!hit) {
+        for (const g of S.guns) {
+          if (g.taken) continue;
+          if (Math.abs(b.z - g.z) < 0.9 && Math.abs(b.laneX - LANES[g.lane]) < 0.9) {
+            takeGun(g);
+            hit = true;
+            break;
+          }
+        }
+      }
+    }
+    if (hit || b.z < -88) {
+      scene.remove(b.mesh);
+      S.bullets.splice(i, 1);
+    }
+  }
+  for (let i = S.packs.length - 1; i >= 0; i--) {
+    const p = S.packs[i];
+    if (p.dead) {
+      S.packs.splice(i, 1);
+      continue;
+    }
+    p.z += (S.speed + p.own) * dt;
+    if (p.type === "ultralisk") p.z = Math.min(p.z, PLAYER_Z - 0.5);
+    p.group.position.z = p.z;
+    p.group.position.x = LANES[p.lane] + Math.sin(S.time * 3 + p.z) * 0.15;
+    if (p.ranged) {
+      p.cd -= dt;
+      if (p.cd <= 0 && p.z < -8) {
+        p.cd = p.type === "ultralisk" ? 0.9 : 1.5;
+        const n = p.type === "ultralisk" ? 3 : 1;
+        for (let k = 0; k < n; k++) fireSpine(p);
+      }
+    }
+    if (p.z >= PLAYER_Z - 0.5 && Math.abs(LANES[p.lane] - S.laneX) < 0.9) {
+      if (p.type === "ultralisk") {
+        gameOver("The Ultralisk crushed your squad of " + fmt(S.count) + ".");
+        return;
+      }
+      if (S.count > p.count) {
+        const lost = Math.ceil(p.count);
+        S.count -= lost;
+        toast("clash won \u2212" + lost);
+        beep(220, 0.15);
+        S.shake = Math.max(S.shake, 0.4);
+        killPack(p);
+      } else {
+        gameOver("Your squad of " + fmt(S.count) + " charged into a zerg pack of " + fmt(p.count) + " \u2014 the swarm wins.");
+        return;
+      }
+    }
+    if (p.z > 12) {
+      scene.remove(p.group);
+      S.packs.splice(i, 1);
+      if (S.boss === p) S.boss = null;
+    }
+  }
+  for (let i = S.walls.length - 1; i >= 0; i--) {
+    const w = S.walls[i];
+    w.z += S.speed * dt;
+    w.group.position.z = w.z;
+    if (!w.resolved && w.z >= PLAYER_Z) {
+      w.resolved = true;
+      const gate = w.gates.find((g) => g.lane === S.lane);
+      if (gate) {
+        const before = S.count;
+        S.count = applyOp(S.count, gate.op, gate.val);
+        toast(gate.op + gate.val + " \u2192 " + fmt(S.count) + " fighters");
+        beep(gate.op === "+" || gate.op === "\xD7" ? 660 : 330, 0.12);
+        S.shake = Math.max(S.shake, 0.25);
+        if (S.count >= before) chord([523, 659], 0.12);
+        if (S.count <= 0) {
+          gameOver("The gate math zeroed your squad out.");
+          return;
+        }
+      } else {
+        S.count -= 12;
+        toast("WALL! \u221212");
+        S.shake = 0.7;
+        beep(160, 0.2);
+        if (S.count <= 0) {
+          gameOver("Bonked into a solid wall at full speed.");
+          return;
+        }
+      }
+    }
+    if (w.z > 12) {
+      scene.remove(w.group);
+      S.walls.splice(i, 1);
+    }
+  }
+  for (let i = S.guns.length - 1; i >= 0; i--) {
+    const g = S.guns[i];
+    g.z += S.speed * dt;
+    g.group.position.z = g.z;
+    if (!g.taken && g.z >= PLAYER_Z - 0.5 && g.lane === S.lane) takeGun(g);
+    if (g.z > 12 || g.taken) {
+      S.guns.splice(i, 1);
+    }
+  }
+  for (let i = S.targets.length - 1; i >= 0; i--) {
+    const t = S.targets[i];
+    if (t.dead) {
+      S.targets.splice(i, 1);
+      continue;
+    }
+    t.z += S.speed * dt;
+    t.group.position.z = t.z;
+    if (t.z > 12) {
+      scene.remove(t.group);
+      S.targets.splice(i, 1);
+    }
+  }
+  for (let i = S.spikes.length - 1; i >= 0; i--) {
+    const s = S.spikes[i];
+    s.z += S.speed * dt;
+    s.group.position.z = s.z;
+    if (!s.used && s.z >= PLAYER_Z && s.lane === S.lane) {
+      s.used = true;
+      S.count -= s.dmg;
+      toast("SPIKES \u2212" + s.dmg);
+      S.shake = 0.6;
+      beep(180, 0.2);
+      if (S.count <= 0) {
+        gameOver("Shredded on the spike strip.");
+        return;
+      }
+    }
+    if (s.z > 12) {
+      scene.remove(s.group);
+      S.spikes.splice(i, 1);
+    }
+  }
+  for (let i = S.spines.length - 1; i >= 0; i--) {
+    const s = S.spines[i];
+    s.z += (S.speed + s.vz) * dt;
+    s.mesh.position.set(s.x, s.y, s.z);
+    if (s.z >= PLAYER_Z - 0.4) {
+      scene.remove(s.mesh);
+      S.spines.splice(i, 1);
+      if (Math.abs(s.x - S.laneX) < 0.8) {
+        S.count -= 1;
+        S.shake = Math.max(S.shake, 0.15);
+        if (S.count <= 0) {
+          gameOver("Peppered by hydralisk spines.");
+          return;
+        }
+      }
+    }
+  }
+  for (const d of dashPool) {
+    d.position.z += S.speed * dt;
+    if (d.position.z > 8) d.position.z -= 14 * 9;
+  }
+  for (const r of ruinPool) {
+    r.position.z += S.speed * dt;
+    if (r.position.z > 14) r.position.z -= 16 * 8;
+  }
+  rebuildPlayer();
+  S.hudT -= dt;
+  if (S.hudT <= 0) {
+    S.hudT = 0.1;
+    updateHud();
+  }
+}
+function updateHud() {
+  $("count").textContent = fmt(S.count);
+  $("level").textContent = String(S.level);
+  $("dist").textContent = Math.floor(S.worldZ) + "m";
+  $("gun").textContent = "Lv" + S.gunLvl;
+  $("best").textContent = Math.max(best, Math.floor(S.worldZ)) + "m";
+}
+var bannerEl = document.createElement("div");
+bannerEl.className = "mr-banner";
+canvas.parentElement?.appendChild(bannerEl);
+function render() {
+  if (S.paused) {
+    bannerEl.textContent = "\u23F8 PAUSED \u2014 press P";
+    bannerEl.classList.add("show");
+  } else if (S.bannerT > 0) {
+    bannerEl.textContent = S.banner;
+    bannerEl.classList.add("show");
+  } else {
+    bannerEl.classList.remove("show");
+  }
+  const sh = S.shake;
+  camera.position.x = (Math.random() - 0.5) * sh;
+  camera.position.y = 4.6 + (Math.random() - 0.5) * sh * 0.6;
+  renderer.render(scene, camera);
+}
+function setMouseFromClient(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  S.mouseX = (clientX - rect.left) / Math.max(1, rect.width) * W;
+  S.mouseActive = true;
+}
+window.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  S.keys[k] = true;
+  if (k === "arrowleft" || k === "a") {
+    S.lane = clamp(S.lane - 1, 0, 2);
+    S.mouseActive = false;
+    e.preventDefault();
+  } else if (k === "arrowright" || k === "d") {
+    S.lane = clamp(S.lane + 1, 0, 2);
+    S.mouseActive = false;
+    e.preventDefault();
+  } else if (k === "p") {
+    togglePause();
+  } else if (k === "r") {
+    startGame();
+  } else if ((k === " " || k === "enter") && S.phase === "over") {
+    startGame();
+    e.preventDefault();
+  }
+});
+window.addEventListener("keyup", (e) => {
+  S.keys[e.key.toLowerCase()] = false;
+});
+window.addEventListener("mousemove", (e) => setMouseFromClient(e.clientX));
+canvas.addEventListener("touchstart", (e) => {
+  setMouseFromClient(e.touches[0].clientX);
+  e.preventDefault();
+}, { passive: false });
+canvas.addEventListener("touchmove", (e) => {
+  setMouseFromClient(e.touches[0].clientX);
+  e.preventDefault();
+}, { passive: false });
+$("ovBtn").addEventListener("click", () => startGame());
+$("pauseBtn").addEventListener("click", () => togglePause());
+$("restartBtn").addEventListener("click", () => startGame());
+var last = performance.now();
+function loop(now) {
+  const dt = clamp((now - last) / 1e3, 0, 0.05);
+  last = now;
+  if (S.started && !S.paused && S.phase === "run") update(dt);
+  render();
   requestAnimationFrame(loop);
-})();
+}
+reset();
+best = loadBest();
+rebuildPlayer();
+updateHud();
+requestAnimationFrame(loop);
