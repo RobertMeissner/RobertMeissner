@@ -29,3 +29,36 @@ export function beep(freq = 440, dur = 0.08, type: OscillatorType = "square", vo
 export function chord(freqs: number[], dur = 0.25, type: OscillatorType = "triangle", vol = 0.06): void {
   freqs.forEach((f, i) => setTimeout(() => beep(f, dur, type, vol), i * 45));
 }
+
+const sampleRaw: Record<string, ArrayBuffer> = {};
+const sampleDecoded: Record<string, AudioBuffer> = {};
+
+export function registerSample(name: string, url: string): void {
+  fetch(url)
+    .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.arrayBuffer(); })
+    .then((b) => { sampleRaw[name] = b; })
+    .catch(() => {});
+}
+
+export function sfx(name: string, vol = 0.5, rate = 1): boolean {
+  try {
+    const a = ensureAudio();
+    const raw = sampleRaw[name];
+    if (!raw) return false;
+    const play = (buf: AudioBuffer): void => {
+      const src = a.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = rate;
+      const g = a.createGain();
+      g.gain.value = vol;
+      src.connect(g).connect(a.destination);
+      src.start();
+    };
+    const cached = sampleDecoded[name];
+    if (cached) { play(cached); return true; }
+    a.decodeAudioData(raw.slice(0)).then((buf) => { sampleDecoded[name] = buf; play(buf); }).catch(() => {});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
