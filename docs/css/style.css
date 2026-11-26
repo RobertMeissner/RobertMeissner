@@ -11,9 +11,9 @@ body {
 
 body {
   background:
-    linear-gradient(rgba(6, 8, 14, 0.55), rgba(6, 8, 14, 0.8)),
+    linear-gradient(rgba(18, 12, 7, 0.55), rgba(18, 12, 7, 0.82)),
     url("../assets/egypt-desert.jpg") center / cover no-repeat fixed,
-    #050510;
+    #14100a;
   color: #e8ecff;
   font-family: "Segoe UI", system-ui, sans-serif;
   overflow: hidden;
@@ -39,29 +39,29 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, rgba(10, 12, 40, 0.55), rgba(3, 3, 12, 0.92));
+  background: radial-gradient(ellipse at center, rgba(16, 11, 6, 0.6), rgba(8, 5, 3, 0.94));
   transition: opacity 0.8s ease;
 }
 
 .panel {
   text-align: center;
   padding: 2.5rem 3rem;
-  border: 1px solid rgba(120, 160, 255, 0.35);
+  border: 1px solid rgba(216, 196, 154, 0.35);
   border-radius: 14px;
-  background: rgba(8, 10, 30, 0.72);
-  box-shadow: 0 0 40px rgba(60, 110, 255, 0.25);
+  background: rgba(20, 15, 9, 0.72);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.45);
 }
 
 .panel h1 {
   font-size: 2.4rem;
   letter-spacing: 0.35em;
   margin-bottom: 0.8rem;
-  color: #9fc7ff;
-  text-shadow: 0 0 18px rgba(90, 150, 255, 0.8);
+  color: #e8dcc0;
+  text-shadow: 0 0 18px rgba(216, 196, 154, 0.6);
 }
 
 .panel p {
-  color: #aab4d8;
+  color: #cbbfa4;
   margin-bottom: 1.4rem;
 }
 
@@ -73,8 +73,8 @@ button,
   font: inherit;
   font-weight: 600;
   letter-spacing: 0.15em;
-  color: #050510;
-  background: linear-gradient(135deg, #66ffcc, #4aa3ff);
+  color: #241c12;
+  background: linear-gradient(135deg, #d8c49a, #a8834f);
   border: none;
   border-radius: 8px;
   padding: 0.8rem 1.6rem;
@@ -131,28 +131,28 @@ body.landing {
   justify-content: center;
   min-height: 100vh;
   background:
-    linear-gradient(rgba(6, 8, 14, 0.55), rgba(6, 8, 14, 0.8)),
+    linear-gradient(rgba(18, 12, 7, 0.55), rgba(18, 12, 7, 0.82)),
     url("../assets/egypt-desert.jpg") center / cover no-repeat fixed,
-    #050510;
+    #14100a;
 }
 
 .card {
   text-align: center;
   padding: 3rem;
   max-width: 34rem;
-  border: 1px solid rgba(120, 160, 255, 0.3);
+  border: 1px solid rgba(216, 196, 154, 0.3);
   border-radius: 16px;
-  background: rgba(8, 10, 30, 0.7);
+  background: rgba(20, 15, 9, 0.7);
 }
 
 .card h1 {
   letter-spacing: 0.2em;
-  color: #9fc7ff;
+  color: #e8dcc0;
   margin-bottom: 0.6rem;
 }
 
 .card .sub {
-  color: #aab4d8;
+  color: #cbbfa4;
   margin-bottom: 1.6rem;
 }
 
@@ -162,7 +162,7 @@ body.landing {
 }
 
 .card .links a {
-  color: #66ffcc;
+  color: #d8c49a;
   text-decoration: none;
 }
 
