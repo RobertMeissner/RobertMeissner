@@ -127,7 +127,8 @@ function reset() {
     hudT: 0,
     keys: {},
     mouseX: W / 2,
-    mouseActive: false
+    mouseActive: false,
+    hitSndT: 0
   };
 }
 function loadBest() {
@@ -179,9 +180,18 @@ var MODEL_FILES = {
 var MODEL_TARGET_H = { skitter: 1, spitter: 1.25, behemoth: 3.6 };
 var MODEL_ANIM = { skitter: "Walk", spitter: "Walk", behemoth: "Flying_Idle" };
 var MODELS = {};
+var assetsReady = false;
 var gltfLoader = new GLTFLoader();
 function loadModels() {
-  for (const type of Object.keys(MODEL_FILES)) {
+  const types = Object.keys(MODEL_FILES);
+  let pending = types.length;
+  const done = () => {
+    if (--pending > 0) return;
+    assetsReady = true;
+    const b = $("ovBtn");
+    if (b) b.textContent = "\u25B6 START RUN";
+  };
+  for (const type of types) {
     gltfLoader.load(MODEL_FILES[type], (gltf) => {
       const sc = gltf.scene;
       sc.traverse((o) => {
@@ -193,8 +203,8 @@ function loadModels() {
       const anims = gltf.animations || [];
       const clip = anims.find((c) => c.name === MODEL_ANIM[type]) ?? anims[0] ?? null;
       MODELS[type] = { scene: sc, scale: MODEL_TARGET_H[type] / h, clip };
-    }, void 0, () => {
-    });
+      done();
+    }, void 0, () => done());
   }
 }
 var SFX_FILES = {
@@ -287,9 +297,13 @@ for (let i = 0; i < 16; i++) {
 }
 var moteCols = [7268351, 16765500, 16743129, 6156426, 11827967];
 var motePool = [];
-for (let i = 0; i < 26; i++) {
-  const m = ball(0.09 + Math.random() * 0.09, moteCols[i % moteCols.length]);
-  m.position.set((Math.random() - 0.5) * 20, 0.6 + Math.random() * 7, -Math.random() * 130);
+function placeMote(m) {
+  const side = Math.random() < 0.5 ? -1 : 1;
+  m.position.set(side * (3.6 + Math.random() * 6.5), 0.8 + Math.random() * 5, -Math.random() * 130);
+}
+for (let i = 0; i < 12; i++) {
+  const m = ball(0.07 + Math.random() * 0.06, moteCols[i % moteCols.length]);
+  placeMote(m);
   scene.add(m);
   motePool.push(m);
 }
@@ -428,6 +442,7 @@ function spawnPack(z, lane, count, type) {
     balls,
     model,
     mixer,
+    dying: 0,
     type,
     dead: false
   };
@@ -523,8 +538,9 @@ function spawnBoss() {
   if (!sfx("bossIn", 0.7)) chord([196, 147], 0.5);
 }
 function killPack(p) {
+  if (p.dead) return;
   p.dead = true;
-  scene.remove(p.group);
+  p.dying = 0.25;
   sfx(p.type === "behemoth" ? "bossDown" : "kill", p.type === "behemoth" ? 0.8 : 0.5);
   if (S.boss === p) {
     S.boss = null;
@@ -542,7 +558,7 @@ function fireBullet() {
   mesh.position.set(S.laneX + 0.25, 0.95, -0.6);
   scene.add(mesh);
   S.bullets.push({ mesh, z: -0.6, laneX: S.laneX + 0.25 });
-  if (!sfx("fire", 0.22, 0.9 + Math.random() * 0.3)) beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
+  if (!sfx("fire", 0.12, 0.9 + Math.random() * 0.3)) beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
 }
 function fireSpine(p) {
   const x = p.type === "behemoth" ? S.laneX + (Math.random() - 0.5) * 0.6 : LANES[p.lane] + (Math.random() - 0.5) * 0.8;
@@ -587,6 +603,10 @@ function gameOver(reason) {
   if (!sfx("over", 0.8)) chord([220, 165, 110], 0.9);
 }
 function startGame() {
+  if (!assetsReady) {
+    toast("assets still loading\u2026");
+    return;
+  }
   clearEntities();
   reset();
   best = loadBest();
@@ -605,6 +625,7 @@ function togglePause() {
 }
 function update(dt) {
   S.time += dt;
+  S.hitSndT = Math.max(0, S.hitSndT - dt);
   S.worldZ += S.speed * dt;
   S.shake = Math.max(0, S.shake - dt * 3);
   if (S.bannerT > 0) S.bannerT -= dt;
@@ -643,7 +664,10 @@ function update(dt) {
         if (Math.abs(b.z - p.z) < p.r + 0.4 && Math.abs(b.laneX - LANES[p.lane]) < 0.9) {
           p.count -= dmg;
           hit = true;
-          sfx("hit", 0.3, 1 + Math.random() * 0.2);
+          if (S.hitSndT <= 0) {
+            S.hitSndT = 0.09;
+            sfx("hit", 0.18, 1 + Math.random() * 0.2);
+          }
           if (p.count <= 0) killPack(p);
           else updatePackVisual(p);
           break;
@@ -682,7 +706,16 @@ function update(dt) {
   for (let i = S.packs.length - 1; i >= 0; i--) {
     const p = S.packs[i];
     if (p.dead) {
-      S.packs.splice(i, 1);
+      p.dying -= dt;
+      p.z += S.speed * dt;
+      p.group.position.z = p.z;
+      const k = Math.max(1e-3, p.dying / 0.25);
+      if (p.model) p.model.scale.setScalar(MODELS[p.type].scale * k);
+      else for (const b of p.balls) b.scale.setScalar(k);
+      if (p.dying <= 0) {
+        scene.remove(p.group);
+        S.packs.splice(i, 1);
+      }
       continue;
     }
     p.z += (S.speed + p.own) * dt;
@@ -825,11 +858,7 @@ function update(dt) {
   }
   for (const m of motePool) {
     m.position.z += S.speed * dt * 0.6;
-    if (m.position.z > 8) {
-      m.position.z -= 138;
-      m.position.x = (Math.random() - 0.5) * 20;
-      m.position.y = 0.6 + Math.random() * 7;
-    }
+    if (m.position.z > 3) placeMote(m);
   }
   rebuildPlayer();
   S.hudT -= dt;
@@ -915,5 +944,6 @@ reset();
 best = loadBest();
 rebuildPlayer();
 updateHud();
+$("ovBtn").textContent = "\u23F3 LOADING ASSETS\u2026";
 loadModels();
 requestAnimationFrame(loop);

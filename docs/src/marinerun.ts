@@ -17,7 +17,7 @@ interface GateWall { group: any; z: number; gates: GateInfo[]; resolved: boolean
 interface Pack {
   group: any; z: number; lane: number; count: number; maxCount: number;
   own: number; r: number; ranged: boolean; cd: number; label: any; balls: any[];
-  model: any; mixer: any;
+  model: any; mixer: any; dying: number;
   type: "skitter" | "spitter" | "behemoth"; dead: boolean;
 }
 interface TargetT { group: any; z: number; lane: number; dead: boolean; }
@@ -34,7 +34,7 @@ interface State {
   spawnCursor: number; boss: Pack | null;
   phase: "run" | "over";
   shake: number; banner: string; bannerT: number;
-  paused: boolean; started: boolean; time: number; hudT: number;
+  paused: boolean; started: boolean; time: number; hudT: number; hitSndT: number;
   keys: Record<string, boolean>; mouseX: number; mouseActive: boolean;
 }
 
@@ -69,7 +69,7 @@ function reset(): void {
     phase: "run",
     shake: 0, banner: "", bannerT: 0,
     paused: false, started: false, time: 0, hudT: 0,
-    keys: {}, mouseX: W / 2, mouseActive: false,
+    keys: {}, mouseX: W / 2, mouseActive: false, hitSndT: 0,
   };
 }
 
@@ -121,9 +121,18 @@ const MODEL_FILES: Record<string, string> = {
 const MODEL_TARGET_H: Record<string, number> = { skitter: 1.0, spitter: 1.25, behemoth: 3.6 };
 const MODEL_ANIM: Record<string, string> = { skitter: "Walk", spitter: "Walk", behemoth: "Flying_Idle" };
 const MODELS: Record<string, { scene: any; scale: number; clip: any }> = {};
+let assetsReady = false;
 const gltfLoader = new GLTFLoader();
 function loadModels(): void {
-  for (const type of Object.keys(MODEL_FILES)) {
+  const types = Object.keys(MODEL_FILES);
+  let pending = types.length;
+  const done = (): void => {
+    if (--pending > 0) return;
+    assetsReady = true;
+    const b = $("ovBtn");
+    if (b) b.textContent = "▶ START RUN";
+  };
+  for (const type of types) {
     gltfLoader.load(MODEL_FILES[type], (gltf: any) => {
       const sc = gltf.scene as any;
       sc.traverse((o: any) => { if (o.isMesh && o.material) o.material.fog = false; });
@@ -133,7 +142,8 @@ function loadModels(): void {
       const anims = (gltf.animations as any[]) || [];
       const clip = anims.find((c: any) => c.name === MODEL_ANIM[type]) ?? anims[0] ?? null;
       MODELS[type] = { scene: sc, scale: MODEL_TARGET_H[type] / h, clip };
-    }, undefined, () => {});
+      done();
+    }, undefined, () => done());
   }
 }
 
@@ -234,9 +244,13 @@ for (let i = 0; i < 16; i++) {
 
 const moteCols = [0x6ee7ff, 0xffd23c, 0xff7ad9, 0x5df08a, 0xb47aff];
 const motePool: any[] = [];
-for (let i = 0; i < 26; i++) {
-  const m = ball(0.09 + Math.random() * 0.09, moteCols[i % moteCols.length]);
-  m.position.set((Math.random() - 0.5) * 20, 0.6 + Math.random() * 7, -Math.random() * 130);
+function placeMote(m: any): void {
+  const side = Math.random() < 0.5 ? -1 : 1;
+  m.position.set(side * (3.6 + Math.random() * 6.5), 0.8 + Math.random() * 5, -Math.random() * 130);
+}
+for (let i = 0; i < 12; i++) {
+  const m = ball(0.07 + Math.random() * 0.06, moteCols[i % moteCols.length]);
+  placeMote(m);
   scene.add(m);
   motePool.push(m);
 }
@@ -368,7 +382,7 @@ function spawnPack(z: number, lane: number, count: number, type: "skitter" | "sp
     own: type === "skitter" ? 3.5 : type === "behemoth" ? 0.6 : 0,
     r: type === "behemoth" ? 2.4 : 1.2,
     ranged: type !== "skitter",
-    cd: 1 + Math.random(), label, balls, model, mixer, type, dead: false,
+    cd: 1 + Math.random(), label, balls, model, mixer, dying: 0, type, dead: false,
   };
   S.packs.push(pack);
   return pack;
@@ -466,8 +480,9 @@ function spawnBoss(): void {
 }
 
 function killPack(p: Pack): void {
+  if (p.dead) return;
   p.dead = true;
-  scene.remove(p.group);
+  p.dying = 0.25;
   sfx(p.type === "behemoth" ? "bossDown" : "kill", p.type === "behemoth" ? 0.8 : 0.5);
   if (S.boss === p) {
     S.boss = null;
@@ -486,7 +501,7 @@ function fireBullet(): void {
   mesh.position.set(S.laneX + 0.25, 0.95, -0.6);
   scene.add(mesh);
   S.bullets.push({ mesh, z: -0.6, laneX: S.laneX + 0.25 });
-  if (!sfx("fire", 0.22, 0.9 + Math.random() * 0.3)) beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
+  if (!sfx("fire", 0.12, 0.9 + Math.random() * 0.3)) beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
 }
 
 function fireSpine(p: Pack): void {
@@ -536,6 +551,10 @@ function gameOver(reason: string): void {
 }
 
 function startGame(): void {
+  if (!assetsReady) {
+    toast("assets still loading…");
+    return;
+  }
   clearEntities();
   reset();
   best = loadBest();
@@ -556,6 +575,7 @@ function togglePause(): void {
 
 function update(dt: number): void {
   S.time += dt;
+  S.hitSndT = Math.max(0, S.hitSndT - dt);
   S.worldZ += S.speed * dt;
   S.shake = Math.max(0, S.shake - dt * 3);
   if (S.bannerT > 0) S.bannerT -= dt;
@@ -598,7 +618,10 @@ function update(dt: number): void {
         if (Math.abs(b.z - p.z) < p.r + 0.4 && Math.abs(b.laneX - LANES[p.lane]) < 0.9) {
           p.count -= dmg;
           hit = true;
-          sfx("hit", 0.3, 1 + Math.random() * 0.2);
+          if (S.hitSndT <= 0) {
+            S.hitSndT = 0.09;
+            sfx("hit", 0.18, 1 + Math.random() * 0.2);
+          }
           if (p.count <= 0) killPack(p);
           else updatePackVisual(p);
           break;
@@ -638,7 +661,16 @@ function update(dt: number): void {
   for (let i = S.packs.length - 1; i >= 0; i--) {
     const p = S.packs[i];
     if (p.dead) {
-      S.packs.splice(i, 1);
+      p.dying -= dt;
+      p.z += S.speed * dt;
+      p.group.position.z = p.z;
+      const k = Math.max(0.001, p.dying / 0.25);
+      if (p.model) p.model.scale.setScalar(MODELS[p.type].scale * k);
+      else for (const b of p.balls) b.scale.setScalar(k);
+      if (p.dying <= 0) {
+        scene.remove(p.group);
+        S.packs.splice(i, 1);
+      }
       continue;
     }
     p.z += (S.speed + p.own) * dt;
@@ -787,11 +819,7 @@ function update(dt: number): void {
   }
   for (const m of motePool) {
     m.position.z += S.speed * dt * 0.6;
-    if (m.position.z > 8) {
-      m.position.z -= 138;
-      m.position.x = (Math.random() - 0.5) * 20;
-      m.position.y = 0.6 + Math.random() * 7;
-    }
+    if (m.position.z > 3) placeMote(m);
   }
 
   rebuildPlayer();
@@ -886,5 +914,6 @@ reset();
 best = loadBest();
 rebuildPlayer();
 updateHud();
+$("ovBtn").textContent = "⏳ LOADING ASSETS…";
 loadModels();
 requestAnimationFrame(loop);
