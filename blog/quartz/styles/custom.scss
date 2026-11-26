@@ -6,8 +6,8 @@
 body {
   background-image:
     linear-gradient(
-      color-mix(in srgb, var(--light) 70%, transparent),
-      color-mix(in srgb, var(--light) 88%, transparent)
+      color-mix(in srgb, var(--light) 78%, transparent),
+      color-mix(in srgb, var(--light) 92%, transparent)
     ),
     url("static/egypt-bg.jpg");
   background-size: cover;
@@ -15,28 +15,28 @@ body {
   background-attachment: fixed;
 }
 
-// happily egyptian accent palette: pharaoh gold + carnelian red
+// gritty sandy egyptian accent palette: desert ochre + rust
 :root {
-  --secondary: #b8860b;
-  --tertiary: #c1272d;
+  --secondary: #8f6b2a;
+  --tertiary: #8f3a24;
 }
 
 :root[saved-theme="dark"] {
-  --secondary: #ffd34d;
-  --tertiary: #ff6b4a;
+  --secondary: #d2a75f;
+  --tertiary: #b05c33;
 }
 
-// colorful buttons
+// sandy stone buttons
 button {
-  background: linear-gradient(135deg, #ffd34d, #ff8c42);
-  color: #241a05;
+  background: linear-gradient(135deg, #d8c49a, #8a6b4a);
+  color: #241c12;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 600;
 }
 
 button:hover {
-  filter: brightness(1.1) saturate(1.15);
+  filter: brightness(1.08);
 }
 
 // link texts in hieroglyphs, turning into latin letters on hover

@@ -5,9 +5,9 @@ body.talos {
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(rgba(8, 6, 4, 0.5), rgba(8, 6, 4, 0.75)),
+    linear-gradient(rgba(20, 13, 7, 0.55), rgba(20, 13, 7, 0.82)),
     url("../assets/egypt-desert.jpg") center / cover no-repeat fixed,
-    #0a0805;
+    #14100a;
   font-family: "Courier New", ui-monospace, monospace;
 }
 
@@ -16,8 +16,8 @@ body.talos {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(53, 240, 208, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(53, 240, 208, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(216, 196, 154, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(216, 196, 154, 0.06) 1px, transparent 1px);
   background-size: 48px 48px;
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
@@ -27,10 +27,10 @@ body.talos {
   position: fixed;
   width: 90px;
   fill: none;
-  stroke: #35f0d0;
+  stroke: #d8c49a;
   stroke-width: 2;
-  opacity: 0.5;
-  filter: drop-shadow(0 0 6px rgba(53, 240, 208, 0.8));
+  opacity: 0.45;
+  filter: drop-shadow(0 0 6px rgba(216, 196, 154, 0.6));
   animation: drift 14s ease-in-out infinite;
   pointer-events: none;
 }
@@ -38,8 +38,8 @@ body.talos {
 .sigil-1 { top: 12%; left: 8%; animation-duration: 16s; }
 .sigil-2 {
   top: 70%; left: 12%; width: 60px;
-  stroke: #ffb347;
-  filter: drop-shadow(0 0 6px rgba(255, 179, 71, 0.8));
+  stroke: #c07a3e;
+  filter: drop-shadow(0 0 6px rgba(192, 122, 62, 0.6));
   animation-duration: 12s;
 }
 .sigil-3 { top: 18%; right: 10%; width: 70px; animation-duration: 18s; animation-delay: -4s; }
@@ -71,8 +71,8 @@ body.talos {
   font-size: clamp(2rem, 7vw, 3.4rem);
   letter-spacing: 0.35em;
   line-height: 1.25;
-  color: #d9fff6;
-  text-shadow: 0 0 24px rgba(53, 240, 208, 0.45);
+  color: #f0e4c4;
+  text-shadow: 0 0 24px rgba(216, 196, 154, 0.4);
   margin-bottom: 0.4rem;
 }
 
@@ -433,37 +433,42 @@ button.ghost {
   }
 }
 
-/* happily egyptian buttons */
+/* gritty sandy egyptian buttons */
 .menu-item.egypt {
-  --egypt: linear-gradient(135deg, #ffd34d, #f0a500);
-  --glow: rgba(255, 211, 77, 0.55);
-  border: 1px solid rgba(28, 20, 5, 0.5);
-  color: #1c1405;
+  --sand: linear-gradient(160deg, #d8c49a, #bfa678);
+  --glow: rgba(216, 196, 154, 0.35);
+  --ink: #2e2620;
+  border: 2px solid rgba(43, 34, 25, 0.85);
+  border-radius: 6px;
+  color: var(--ink);
   font-weight: 700;
-  background: var(--egypt);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--sand);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 248, 230, 0.35),
+    inset 0 -3px 6px rgba(74, 60, 44, 0.28);
+  text-shadow: 0 1px 0 rgba(255, 248, 230, 0.3);
   transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
 }
 
-.menu-item.egypt .arrow { color: rgba(28, 20, 5, 0.7); text-shadow: none; }
-.menu-item.egypt .note { color: rgba(28, 20, 5, 0.6); text-shadow: none; }
+.menu-item.egypt .arrow { color: var(--ink); opacity: 0.75; text-shadow: none; }
+.menu-item.egypt .note { color: var(--ink); opacity: 0.65; text-shadow: none; }
 
 .menu-item.egypt:hover {
-  color: #000;
-  background: var(--egypt);
-  filter: brightness(1.08) saturate(1.2);
+  color: var(--ink);
+  background: var(--sand);
+  filter: brightness(1.07);
   transform: translateY(-2px);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5), 0 0 20px var(--glow);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 16px var(--glow);
 }
 
-.menu-item.egypt-gold      { --egypt: linear-gradient(135deg, #ffd34d, #f0a500); --glow: rgba(255, 211, 77, 0.65); }
-.menu-item.egypt-lapis     { --egypt: linear-gradient(135deg, #6ea8ff, #3b82f6); --glow: rgba(110, 168, 255, 0.65); }
-.menu-item.egypt-carnelian { --egypt: linear-gradient(135deg, #ff8a66, #e0432f); --glow: rgba(255, 122, 89, 0.65); }
-.menu-item.egypt-turquoise { --egypt: linear-gradient(135deg, #4be0c8, #14b8a6); --glow: rgba(75, 224, 200, 0.65); }
-.menu-item.egypt-malachite { --egypt: linear-gradient(135deg, #8be05a, #3fae5a); --glow: rgba(139, 224, 90, 0.65); }
-.menu-item.egypt-indigo    { --egypt: linear-gradient(135deg, #9aa8ff, #6366f1); --glow: rgba(154, 168, 255, 0.65); }
-.menu-item.egypt-orange    { --egypt: linear-gradient(135deg, #ffc46b, #ff7a1a); --glow: rgba(255, 179, 71, 0.65); }
+.menu-item.egypt-sand      { --sand: linear-gradient(160deg, #d8c49a, #bfa678); --glow: rgba(216, 196, 154, 0.4); }
+.menu-item.egypt-ochre     { --sand: linear-gradient(160deg, #cf8b4e, #a05f2c); --glow: rgba(207, 139, 78, 0.4); }
+.menu-item.egypt-dune      { --sand: linear-gradient(160deg, #caa96e, #a8834f); --glow: rgba(202, 169, 110, 0.4); }
+.menu-item.egypt-papyrus   { --sand: linear-gradient(160deg, #cbb98a, #a89468); --glow: rgba(203, 185, 138, 0.4); }
+.menu-item.egypt-limestone { --sand: linear-gradient(160deg, #e3d7b8, #c4b592); --glow: rgba(227, 215, 184, 0.45); }
+.menu-item.egypt-umber     { --sand: linear-gradient(160deg, #8a6b4a, #5f4630); --glow: rgba(138, 107, 74, 0.45); --ink: #efe3c2; }
+.menu-item.egypt-basalt    { --sand: linear-gradient(160deg, #4a4034, #2b241d); --glow: rgba(74, 64, 52, 0.6); --ink: #e8dcc0; }
 
 /* button texts in hieroglyphs, turning into latin letters on hover */
 .menu-item .label { font-size: 0; }
