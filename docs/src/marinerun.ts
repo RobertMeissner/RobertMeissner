@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { beep, chord } from "./sfx";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { beep, chord, sfx, registerSample } from "./sfx";
 
 const $ = (id: string): HTMLElement => document.getElementById(id) as HTMLElement;
 const canvas = $("scene") as HTMLCanvasElement;
@@ -16,6 +17,7 @@ interface GateWall { group: any; z: number; gates: GateInfo[]; resolved: boolean
 interface Pack {
   group: any; z: number; lane: number; count: number; maxCount: number;
   own: number; r: number; ranged: boolean; cd: number; label: any; balls: any[];
+  model: any; mixer: any;
   type: "skitter" | "spitter" | "behemoth"; dead: boolean;
 }
 interface TargetT { group: any; z: number; lane: number; dead: boolean; }
@@ -105,6 +107,51 @@ scene.fog = new THREE.Fog(0x1d2b5e, 34, 140);
 const camera = new THREE.PerspectiveCamera(70, W / H, 0.1, 220);
 camera.position.set(0, 4.6, 6.8);
 camera.lookAt(0, 1.0, -12);
+
+scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+sun.position.set(3, 8, 5);
+scene.add(sun);
+
+const MODEL_FILES: Record<string, string> = {
+  skitter: "assets/models/Orc_Skull.gltf",
+  spitter: "assets/models/Demon.gltf",
+  behemoth: "assets/models/Dragon_Evolved.gltf",
+};
+const MODEL_TARGET_H: Record<string, number> = { skitter: 1.0, spitter: 1.25, behemoth: 3.6 };
+const MODEL_ANIM: Record<string, string> = { skitter: "Walk", spitter: "Walk", behemoth: "Flying_Idle" };
+const MODELS: Record<string, { scene: any; scale: number; clip: any }> = {};
+const gltfLoader = new GLTFLoader();
+function loadModels(): void {
+  for (const type of Object.keys(MODEL_FILES)) {
+    gltfLoader.load(MODEL_FILES[type], (gltf: any) => {
+      const sc = gltf.scene as any;
+      sc.traverse((o: any) => { if (o.isMesh && o.material) o.material.fog = false; });
+      const bb = new THREE.Box3().setFromObject(sc);
+      const h = Math.max(0.001, bb.max.y - bb.min.y);
+      sc.position.y = -bb.min.y;
+      const anims = (gltf.animations as any[]) || [];
+      const clip = anims.find((c: any) => c.name === MODEL_ANIM[type]) ?? anims[0] ?? null;
+      MODELS[type] = { scene: sc, scale: MODEL_TARGET_H[type] / h, clip };
+    }, undefined, () => {});
+  }
+}
+
+const SFX_FILES: Record<string, string> = {
+  fire: "assets/sfx/laser_small_000.ogg",
+  gateGood: "assets/sfx/laser_retro_000.ogg",
+  hit: "assets/sfx/impact_metal_000.ogg",
+  wall: "assets/sfx/impact_metal_002.ogg",
+  kill: "assets/sfx/explosion_crunch_000.ogg",
+  clash: "assets/sfx/explosion_crunch_003.ogg",
+  bossIn: "assets/sfx/force_field_000.ogg",
+  gun: "assets/sfx/force_field_001.ogg",
+  pickup: "assets/sfx/computer_noise_000.ogg",
+  gateBad: "assets/sfx/slime_000.ogg",
+  bossDown: "assets/sfx/low_frequency_explosion_000.ogg",
+  over: "assets/sfx/low_frequency_explosion_001.ogg",
+};
+for (const [k, url] of Object.entries(SFX_FILES)) registerSample(k, url);
 
 function box(w: number, h: number, d: number, color: number): any {
   return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ color, fog: false }));
@@ -290,33 +337,51 @@ function spawnPack(z: number, lane: number, count: number, type: "skitter" | "sp
   scene.add(group);
   const color = type === "skitter" ? 0xff5040 : type === "spitter" ? 0x6fe86a : 0xc07aff;
   const r = type === "behemoth" ? 1.1 : type === "spitter" ? 0.42 : 0.36;
-  const n = Math.min(14, Math.max(4, Math.round(count / 3)));
   const balls: any[] = [];
-  for (let i = 0; i < n; i++) {
-    const b = ball(r, color);
-    const a = Math.random() * Math.PI * 2;
-    const rr = Math.random() * (type === "behemoth" ? 2.2 : 0.9);
-    b.position.set(Math.cos(a) * rr, r + Math.random() * (type === "behemoth" ? 2.2 : 0.8), Math.sin(a) * rr * 0.6);
-    group.add(b);
-    balls.push(b);
+  let model: any = null;
+  let mixer: any = null;
+  const m = MODELS[type];
+  if (m) {
+    model = m.scene.clone(true);
+    model.scale.setScalar(m.scale);
+    group.add(model);
+    if (m.clip) {
+      mixer = new THREE.AnimationMixer(model);
+      mixer.clipAction(m.clip).play();
+    }
+  } else {
+    const n = Math.min(14, Math.max(4, Math.round(count / 3)));
+    for (let i = 0; i < n; i++) {
+      const b = ball(r, color);
+      const a = Math.random() * Math.PI * 2;
+      const rr = Math.random() * (type === "behemoth" ? 2.2 : 0.9);
+      b.position.set(Math.cos(a) * rr, r + Math.random() * (type === "behemoth" ? 2.2 : 0.8), Math.sin(a) * rr * 0.6);
+      group.add(b);
+      balls.push(b);
+    }
   }
   const label = makeLabel(String(count), "#ff5f6e");
-  label.position.y = type === "behemoth" ? 5.2 : 2.4;
+  label.position.y = type === "behemoth" ? 5.2 : 2.6;
   group.add(label);
   const pack: Pack = {
     group, z, lane, count, maxCount: count,
     own: type === "skitter" ? 3.5 : type === "behemoth" ? 0.6 : 0,
     r: type === "behemoth" ? 2.4 : 1.2,
     ranged: type !== "skitter",
-    cd: 1 + Math.random(), label, balls, type, dead: false,
+    cd: 1 + Math.random(), label, balls, model, mixer, type, dead: false,
   };
   S.packs.push(pack);
   return pack;
 }
 
 function updatePackVisual(p: Pack): void {
-  const n = Math.max(0, Math.ceil((p.count / p.maxCount) * p.balls.length));
-  for (let i = 0; i < p.balls.length; i++) p.balls[i].visible = i < n;
+  if (p.model) {
+    const k = 0.75 + 0.5 * Math.sqrt(Math.max(0, p.count) / p.maxCount);
+    p.model.scale.setScalar(MODELS[p.type].scale * k);
+  } else {
+    const n = Math.max(0, Math.ceil((p.count / p.maxCount) * p.balls.length));
+    for (let i = 0; i < p.balls.length; i++) p.balls[i].visible = i < n;
+  }
   const col = p.type === "skitter" ? "#ff7a6a" : p.type === "spitter" ? "#8affa0" : "#d9b3ff";
   setLabel(p.label, fmt(Math.max(0, p.count)), col);
 }
@@ -397,12 +462,13 @@ function spawnBoss(): void {
   S.boss = boss;
   banner("⚠ BEHEMOTH INBOUND ⚠");
   toast("BEHEMOTH — blast it down before it reaches you!");
-  chord([196, 147], 0.5);
+  if (!sfx("bossIn", 0.7)) chord([196, 147], 0.5);
 }
 
 function killPack(p: Pack): void {
   p.dead = true;
   scene.remove(p.group);
+  sfx(p.type === "behemoth" ? "bossDown" : "kill", p.type === "behemoth" ? 0.8 : 0.5);
   if (S.boss === p) {
     S.boss = null;
     S.level += 1;
@@ -420,7 +486,7 @@ function fireBullet(): void {
   mesh.position.set(S.laneX + 0.25, 0.95, -0.6);
   scene.add(mesh);
   S.bullets.push({ mesh, z: -0.6, laneX: S.laneX + 0.25 });
-  beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
+  if (!sfx("fire", 0.22, 0.9 + Math.random() * 0.3)) beep(1200 + S.gunLvl * 120, 0.03, "square", 0.03);
 }
 
 function fireSpine(p: Pack): void {
@@ -437,7 +503,7 @@ function takeGun(g: GunCrate): void {
   g.taken = true;
   S.gunLvl += 1;
   toast("WEAPON UPGRADED — Lv" + S.gunLvl);
-  beep(990, 0.1);
+  if (!sfx("gun", 0.6)) beep(990, 0.1);
   chord([880, 1108], 0.15);
   scene.remove(g.group);
 }
@@ -466,7 +532,7 @@ function gameOver(reason: string): void {
   $("ovText").innerHTML = reason + "<br><br>Level <b>" + S.level + "</b> · distance <b>" + dist + "m</b> · best <b>" + best + "m</b>";
   $("ovBtn").textContent = "↻ RUN AGAIN";
   $("overlay").classList.remove("hidden");
-  chord([220, 165, 110], 0.9);
+  if (!sfx("over", 0.8)) chord([220, 165, 110], 0.9);
 }
 
 function startGame(): void {
@@ -532,6 +598,7 @@ function update(dt: number): void {
         if (Math.abs(b.z - p.z) < p.r + 0.4 && Math.abs(b.laneX - LANES[p.lane]) < 0.9) {
           p.count -= dmg;
           hit = true;
+          sfx("hit", 0.3, 1 + Math.random() * 0.2);
           if (p.count <= 0) killPack(p);
           else updatePackVisual(p);
           break;
@@ -545,7 +612,7 @@ function update(dt: number): void {
             scene.remove(t.group);
             S.count += 5;
             toast("+5 FIGHTERS");
-            beep(880, 0.08);
+            if (!sfx("pickup", 0.5)) beep(880, 0.08);
             hit = true;
             break;
           }
@@ -578,6 +645,7 @@ function update(dt: number): void {
     if (p.type === "behemoth") p.z = Math.min(p.z, PLAYER_Z - 0.5);
     p.group.position.z = p.z;
     p.group.position.x = LANES[p.lane] + Math.sin(S.time * 3 + p.z) * 0.15;
+    if (p.mixer) p.mixer.update(dt);
     if (p.ranged) {
       p.cd -= dt;
       if (p.cd <= 0 && p.z < -8) {
@@ -595,7 +663,7 @@ function update(dt: number): void {
         const lost = Math.ceil(p.count);
         S.count -= lost;
         toast("clash won −" + lost);
-        beep(220, 0.15);
+        if (!sfx("clash", 0.5)) beep(220, 0.15);
         S.shake = Math.max(S.shake, 0.4);
         killPack(p);
       } else {
@@ -621,7 +689,8 @@ function update(dt: number): void {
         const before = S.count;
         S.count = applyOp(S.count, gate.op, gate.val);
         toast(gate.op + gate.val + " → " + fmt(S.count) + " fighters");
-        beep(gate.op === "+" || gate.op === "×" ? 660 : 330, 0.12);
+        const good = gate.op === "+" || gate.op === "×";
+        if (!sfx(good ? "gateGood" : "gateBad", 0.5)) beep(good ? 660 : 330, 0.12);
         S.shake = Math.max(S.shake, 0.25);
         if (S.count >= before) chord([523, 659], 0.12);
         if (S.count <= 0) {
@@ -632,7 +701,7 @@ function update(dt: number): void {
         S.count -= 12;
         toast("WALL! −12");
         S.shake = 0.7;
-        beep(160, 0.2);
+        if (!sfx("wall", 0.6)) beep(160, 0.2);
         if (S.count <= 0) {
           gameOver("Bonked into a solid wall at full speed.");
           return;
@@ -678,7 +747,7 @@ function update(dt: number): void {
       S.count -= s.dmg;
       toast("SPIKES −" + s.dmg);
       S.shake = 0.6;
-      beep(180, 0.2);
+      if (!sfx("hit", 0.45)) beep(180, 0.2);
       if (S.count <= 0) {
         gameOver("Shredded on the spike strip.");
         return;
@@ -817,4 +886,5 @@ reset();
 best = loadBest();
 rebuildPlayer();
 updateHud();
+loadModels();
 requestAnimationFrame(loop);
