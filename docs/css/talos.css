@@ -4,7 +4,10 @@ body.talos {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 30%, #0a1420 0%, #04060a 60%, #020306 100%);
+  background:
+    linear-gradient(rgba(8, 6, 4, 0.5), rgba(8, 6, 4, 0.75)),
+    url("../assets/egypt-desert.jpg") center / cover no-repeat fixed,
+    #0a0805;
   font-family: "Courier New", ui-monospace, monospace;
 }
 
@@ -57,10 +60,11 @@ body.talos {
 }
 
 .boot {
-  color: #3f6f66;
+  color: #d8b878;
   font-size: 0.75rem;
   letter-spacing: 0.2em;
   margin-bottom: 1.5rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .terminal h1 {
@@ -73,11 +77,12 @@ body.talos {
 }
 
 .tagline {
-  color: #5f8f86;
+  color: #e0c184;
   letter-spacing: 0.3em;
   font-size: 0.8rem;
   text-transform: uppercase;
   margin-bottom: 2.2rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .menu {
@@ -91,8 +96,9 @@ body.talos {
   margin: 1.2rem 0 0.2rem;
   font-size: 0.72rem;
   letter-spacing: 0.4em;
-  color: #3f6f66;
+  color: #e0c184;
   font-weight: 400;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .menu-item {
@@ -135,7 +141,8 @@ body.talos {
   margin-top: 2rem;
   font-size: 0.65rem;
   letter-spacing: 0.2em;
-  color: #33564f;
+  color: #b39b6b;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 body.tool-page { display: block; }
@@ -360,9 +367,10 @@ button.ghost {
 
 .hub-text {
   font-size: 0.72rem;
-  color: #7fa89d;
+  color: #ead9b5;
   line-height: 1.7;
   letter-spacing: 0.05em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .icon-bar {
@@ -423,4 +431,56 @@ button.ghost {
   .hub-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* happily egyptian buttons */
+.menu-item.egypt {
+  --egypt: linear-gradient(135deg, #ffd34d, #f0a500);
+  --glow: rgba(255, 211, 77, 0.55);
+  border: 1px solid rgba(28, 20, 5, 0.5);
+  color: #1c1405;
+  font-weight: 700;
+  background: var(--egypt);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+
+.menu-item.egypt .arrow { color: rgba(28, 20, 5, 0.7); text-shadow: none; }
+.menu-item.egypt .note { color: rgba(28, 20, 5, 0.6); text-shadow: none; }
+
+.menu-item.egypt:hover {
+  color: #000;
+  background: var(--egypt);
+  filter: brightness(1.08) saturate(1.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5), 0 0 20px var(--glow);
+}
+
+.menu-item.egypt-gold      { --egypt: linear-gradient(135deg, #ffd34d, #f0a500); --glow: rgba(255, 211, 77, 0.65); }
+.menu-item.egypt-lapis     { --egypt: linear-gradient(135deg, #6ea8ff, #3b82f6); --glow: rgba(110, 168, 255, 0.65); }
+.menu-item.egypt-carnelian { --egypt: linear-gradient(135deg, #ff8a66, #e0432f); --glow: rgba(255, 122, 89, 0.65); }
+.menu-item.egypt-turquoise { --egypt: linear-gradient(135deg, #4be0c8, #14b8a6); --glow: rgba(75, 224, 200, 0.65); }
+.menu-item.egypt-malachite { --egypt: linear-gradient(135deg, #8be05a, #3fae5a); --glow: rgba(139, 224, 90, 0.65); }
+.menu-item.egypt-indigo    { --egypt: linear-gradient(135deg, #9aa8ff, #6366f1); --glow: rgba(154, 168, 255, 0.65); }
+.menu-item.egypt-orange    { --egypt: linear-gradient(135deg, #ffc46b, #ff7a1a); --glow: rgba(255, 179, 71, 0.65); }
+
+/* button texts in hieroglyphs, turning into latin letters on hover */
+.menu-item .label { font-size: 0; }
+.menu-item .label::after {
+  content: attr(data-glyph);
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  font-family: "Noto Sans Egyptian Hieroglyphs", "Segoe UI Historic", "Segoe UI Symbol", sans-serif;
+}
+.menu-item:hover .label::after {
+  content: attr(data-latin);
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  font-family: inherit;
+  animation: glyph-in 0.18s ease;
+}
+@keyframes glyph-in {
+  from { opacity: 0.2; transform: translateY(2px) scale(0.96); }
+  to { opacity: 1; transform: none; }
 }

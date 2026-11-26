@@ -5,5 +5,6 @@ node_modules/
 .quartz-cache/
 site/
 blog/public/
+blog/quartz.lock.json
 tsconfig.tsbuildinfo
 
