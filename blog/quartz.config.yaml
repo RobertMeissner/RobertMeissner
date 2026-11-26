@@ -230,6 +230,9 @@ plugins:
     enabled: true
     options: {}
     order: 45
+  - source: "./plugins/hieroglyphs"
+    enabled: true
+    order: 95
   - source: "@quartz-community/encrypted-pages"
     enabled: true
     options:

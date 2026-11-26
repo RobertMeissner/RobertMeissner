@@ -10,7 +10,10 @@ body {
 }
 
 body {
-  background: #050510;
+  background:
+    linear-gradient(rgba(6, 8, 14, 0.55), rgba(6, 8, 14, 0.8)),
+    url("../assets/egypt-desert.jpg") center / cover no-repeat fixed,
+    #050510;
   color: #e8ecff;
   font-family: "Segoe UI", system-ui, sans-serif;
   overflow: hidden;
@@ -127,7 +130,10 @@ body.landing {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: radial-gradient(ellipse at top, #101736, #050510 70%);
+  background:
+    linear-gradient(rgba(6, 8, 14, 0.55), rgba(6, 8, 14, 0.8)),
+    url("../assets/egypt-desert.jpg") center / cover no-repeat fixed,
+    #050510;
 }
 
 .card {

@@ -1,3 +1,65 @@
 @use "./variables.scss" as *;
 
 // put your custom CSS here!
+
+// Egyptian desert sunset backdrop for the whole blog
+body {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--light) 70%, transparent),
+      color-mix(in srgb, var(--light) 88%, transparent)
+    ),
+    url("static/egypt-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+// happily egyptian accent palette: pharaoh gold + carnelian red
+:root {
+  --secondary: #b8860b;
+  --tertiary: #c1272d;
+}
+
+:root[saved-theme="dark"] {
+  --secondary: #ffd34d;
+  --tertiary: #ff6b4a;
+}
+
+// colorful buttons
+button {
+  background: linear-gradient(135deg, #ffd34d, #ff8c42);
+  color: #241a05;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+button:hover {
+  filter: brightness(1.1) saturate(1.15);
+}
+
+// link texts in hieroglyphs, turning into latin letters on hover
+// (the data-glyph/data-latin attributes are set by plugins/hieroglyphs)
+a.hiero {
+  position: relative;
+  color: transparent;
+}
+
+a.hiero::after {
+  content: attr(data-glyph);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary);
+  font-family: "Noto Sans Egyptian Hieroglyphs", "Segoe UI Historic", "Segoe UI Symbol", sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+a.hiero:hover::after {
+  content: attr(data-latin);
+  font-family: inherit;
+  color: var(--tertiary);
+}
